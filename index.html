@@ -7,6 +7,89 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── LOGIN SCREEN ── */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0e1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-overlay.hidden { display: none; }
+
+.login-card {
+  width: 400px;
+  padding: 40px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+  text-align: center;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #f1f5f9;
+}
+.login-card .login-logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 16px;
+}
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+.login-card h2 span { color: #06b6d4; }
+.login-card .login-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 28px;
+}
+.login-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.login-field:focus { border-color: #2563eb; }
+.login-field::placeholder { color: #64748b; }
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.login-btn:hover { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); transform: translateY(-1px); }
+.login-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 12px;
+  min-height: 20px;
+}
+
 :root {
   --brand-primary: #2563eb;
   --brand-primary-dark: #1d4ed8;
@@ -1678,6 +1761,21 @@ body::before {
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">🛡️</div>
+    <h2>Ticket<span>Shield</span> AI</h2>
+    <p class="login-sub">Sign in to access the citation defense platform</p>
+    <form onsubmit="return handleLogin(event)">
+      <input class="login-field" type="text" id="loginUser" placeholder="Username" autocomplete="username" autofocus>
+      <input class="login-field" type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+      <button class="login-btn" type="submit">Sign In</button>
+    </form>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav class="navbar">
   <div class="logo">
@@ -2432,6 +2530,39 @@ body::before {
 </div>
 
 <script>
+// ── AUTH ──
+const AUTH_USER_HASH = '88a5b49f3ab0100383f113b286e4f63b3c7813141b48a8ecb34668f625d5313f';
+const AUTH_PASS_HASH = '5e52d98bac2869a25cd13fe7e8914f477f393b8d3deeba623f418d93bff24e57';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const user = document.getElementById('loginUser').value;
+  const pass = document.getElementById('loginPass').value;
+  const [userHash, passHash] = await Promise.all([sha256(user), sha256(pass)]);
+
+  if (userHash === AUTH_USER_HASH && passHash === AUTH_PASS_HASH) {
+    sessionStorage.setItem('ts_auth', '1');
+    document.getElementById('loginOverlay').classList.add('hidden');
+  } else {
+    document.getElementById('loginError').textContent = 'Invalid username or password';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+  return false;
+}
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem('ts_auth') === '1') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('loginOverlay').classList.add('hidden');
+  });
+}
+
 // ── STATE DATA ──
 const states = [
   { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
