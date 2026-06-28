@@ -1,0 +1,3236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TicketShield AI — Traffic Citation Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-primary: #2563eb;
+  --brand-primary-dark: #1d4ed8;
+  --brand-primary-light: #3b82f6;
+  --brand-accent: #06b6d4;
+  --brand-accent-dark: #0891b2;
+  --brand-success: #10b981;
+  --brand-warning: #f59e0b;
+  --brand-danger: #ef4444;
+  --brand-purple: #8b5cf6;
+  --surface-0: #0a0e1a;
+  --surface-1: #111827;
+  --surface-2: #1e293b;
+  --surface-3: #2d3a4f;
+  --surface-4: #374357;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --border-light: #475569;
+  --glow: 0 0 20px rgba(37, 99, 235, 0.3);
+  --glow-accent: 0 0 20px rgba(6, 182, 212, 0.3);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --transition: 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ambient background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── NAV ── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.logo span { color: var(--brand-accent); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.jurisdiction-selector {
+  position: relative;
+}
+
+.jurisdiction-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.jurisdiction-btn:hover {
+  border-color: var(--brand-primary);
+  background: var(--surface-3);
+}
+
+.jurisdiction-btn .state-flag {
+  font-size: 16px;
+}
+
+.jurisdiction-btn .chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.jurisdiction-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.jurisdiction-dropdown.open { display: block; }
+
+.jd-search {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.jd-search input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+
+.jd-search input:focus { border-color: var(--brand-primary); }
+
+.jd-list {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.jd-list::-webkit-scrollbar { width: 6px; }
+.jd-list::-webkit-scrollbar-track { background: transparent; }
+.jd-list::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+
+.jd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 13px;
+}
+
+.jd-item:hover { background: var(--surface-3); }
+.jd-item.active { background: rgba(37, 99, 235, 0.15); color: var(--brand-primary-light); }
+
+.jd-item .set-default {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.jd-item:hover .set-default { opacity: 1; }
+.jd-item .set-default:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
+.jd-item .default-badge {
+  font-size: 10px;
+  color: var(--brand-accent);
+  background: rgba(6, 182, 212, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  position: relative;
+  z-index: 1;
+  padding: 96px 32px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-section {
+  margin-bottom: 32px;
+}
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: rgba(30, 41, 59, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--brand-primary);
+  background: rgba(37, 99, 235, 0.05);
+  box-shadow: var(--glow);
+}
+
+.upload-zone.has-file {
+  border-color: var(--brand-success);
+  border-style: solid;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.upload-zone h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.upload-zone p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.upload-zone .browse-link {
+  color: var(--brand-primary-light);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.upload-formats {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.upload-formats span {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.file-preview {
+  display: none;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  margin-top: 16px;
+}
+
+.file-preview.visible { display: flex; }
+
+.file-preview .file-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.file-preview .file-info { flex: 1; text-align: left; }
+.file-preview .file-name { font-weight: 600; font-size: 14px; }
+.file-preview .file-size { font-size: 12px; color: var(--text-muted); }
+
+.file-preview .remove-file {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+.file-preview .remove-file:hover { background: var(--brand-danger); color: white; }
+
+#fileInput { display: none; }
+
+/* ── CITATION PREVIEW ── */
+.citation-preview {
+  display: none;
+  margin-top: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.citation-preview.visible { display: block; }
+
+.citation-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.citation-preview-header .file-type-badge {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.file-type-badge.pdf { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+.file-type-badge.jpg { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.file-type-badge.png { background: rgba(37, 99, 235, 0.15); color: var(--brand-primary-light); }
+
+.citation-preview-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.preview-image-pane {
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-1);
+  min-height: 300px;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.preview-image-pane img {
+  max-width: 100%;
+  max-height: 468px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.preview-image-pane embed,
+.preview-image-pane object {
+  width: 100%;
+  height: 468px;
+  border-radius: var(--radius-sm);
+}
+
+.preview-image-pane .pdf-fallback {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.preview-image-pane .pdf-fallback .pdf-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+.ocr-pane {
+  padding: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.ocr-pane::-webkit-scrollbar { width: 6px; }
+.ocr-pane::-webkit-scrollbar-track { background: transparent; }
+.ocr-pane::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+
+.ocr-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.ocr-header .pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.ocr-field {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.ocr-field:last-child { border-bottom: none; }
+
+.ocr-field .field-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ocr-field .field-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.ocr-field .field-confidence {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.field-confidence.high { background: rgba(16, 185, 129, 0.15); color: var(--brand-success); }
+.field-confidence.medium { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.field-confidence.low { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+
+.ocr-field.flagged {
+  background: rgba(239, 68, 68, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  margin: 4px -8px;
+}
+.ocr-field.flagged .field-value { color: var(--brand-danger); font-weight: 600; }
+
+.ocr-summary {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .citation-preview-body { grid-template-columns: 1fr; }
+  .preview-image-pane { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* ── ANALYZE BTN ── */
+.analyze-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.analyze-btn {
+  flex: 1;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: -0.2px;
+}
+
+.analyze-btn:hover { box-shadow: var(--glow); transform: translateY(-1px); }
+.analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.analyze-btn .spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.analyze-btn.loading .spinner { display: block; }
+.analyze-btn.loading .btn-text { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── PROGRESS ── */
+.analysis-progress {
+  display: none;
+  margin-bottom: 32px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.analysis-progress.visible { display: block; }
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.progress-header h4 { font-size: 14px; font-weight: 600; }
+.progress-header .pct { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--brand-accent); }
+
+.progress-track {
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+.progress-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.progress-step.active { color: var(--text-primary); background: var(--surface-3); }
+.progress-step.done { color: var(--brand-success); }
+
+.progress-step .step-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.progress-step.active .step-icon { border-color: var(--brand-primary); background: rgba(37, 99, 235, 0.2); }
+.progress-step.done .step-icon { border-color: var(--brand-success); background: rgba(16, 185, 129, 0.2); }
+
+/* ── RESULTS ── */
+.results-container {
+  display: none;
+}
+
+.results-container.visible { display: block; }
+
+/* Score Banner */
+.score-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 32px;
+  align-items: center;
+  padding: 32px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+}
+
+.score-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.score-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+.score-ring .bg { fill: none; stroke: var(--surface-3); stroke-width: 8; }
+.score-ring .fill { fill: none; stroke: var(--brand-success); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 339.292; stroke-dashoffset: 339.292; transition: stroke-dashoffset 1.5s ease; }
+.score-ring .score-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-ring .score-number { font-size: 32px; font-weight: 800; line-height: 1; }
+.score-ring .score-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+.score-summary h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.score-summary p { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+
+.score-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-item {
+  text-align: right;
+}
+
+.stat-item .stat-value { font-size: 24px; font-weight: 700; }
+.stat-item .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.stat-item.danger .stat-value { color: var(--brand-danger); }
+.stat-item.warning .stat-value { color: var(--brand-warning); }
+.stat-item.success .stat-value { color: var(--brand-success); }
+
+/* Analysis Cards Grid */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.analysis-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.analysis-card:hover { border-color: var(--border-light); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.card-icon.blue { background: rgba(37, 99, 235, 0.15); }
+.card-icon.cyan { background: rgba(6, 182, 212, 0.15); }
+.card-icon.purple { background: rgba(139, 92, 246, 0.15); }
+.card-icon.green { background: rgba(16, 185, 129, 0.15); }
+.card-icon.amber { background: rgba(245, 158, 11, 0.15); }
+.card-icon.red { background: rgba(239, 68, 68, 0.15); }
+
+.card-title { font-weight: 600; font-size: 14px; }
+
+.card-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-badge.found { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+.card-badge.clear { background: rgba(16, 185, 129, 0.15); color: var(--brand-success); }
+.card-badge.warning { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.card-badge.info { background: rgba(37, 99, 235, 0.15); color: var(--brand-primary-light); }
+
+.card-body { padding: 16px 20px; }
+
+.finding-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.finding-item:last-child { border-bottom: none; }
+
+.finding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.finding-dot.critical { background: var(--brand-danger); }
+.finding-dot.warning { background: var(--brand-warning); }
+.finding-dot.info { background: var(--brand-primary-light); }
+.finding-dot.success { background: var(--brand-success); }
+
+.impact-meter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+}
+
+.impact-meter .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.impact-bar { flex: 1; height: 6px; background: var(--surface-4); border-radius: 3px; overflow: hidden; }
+.impact-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.impact-bar-fill.high { background: var(--brand-danger); }
+.impact-bar-fill.medium { background: var(--brand-warning); }
+.impact-bar-fill.low { background: var(--brand-success); }
+.impact-meter .value { font-size: 13px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+/* ── ATTORNEY REVIEW PANEL ── */
+.attorney-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.attorney-panel h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.attorney-panel .subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.motion-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.motion-option {
+  padding: 20px;
+  background: var(--surface-3);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.motion-option:hover { border-color: var(--brand-primary); }
+.motion-option.selected { border-color: var(--brand-primary); background: rgba(37, 99, 235, 0.08); }
+
+.motion-option .radio {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  transition: var(--transition);
+}
+
+.motion-option.selected .radio {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  box-shadow: inset 0 0 0 4px var(--surface-3);
+}
+
+.motion-option h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.motion-option p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.motion-option .motion-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.motion-tag.pre-trial { background: rgba(139, 92, 246, 0.15); color: var(--brand-purple); }
+.motion-tag.dismissal { background: rgba(16, 185, 129, 0.15); color: var(--brand-success); }
+
+.attorney-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+  color: white;
+}
+.btn-primary:hover { box-shadow: var(--glow); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.btn-outline:hover { border-color: var(--brand-primary); background: rgba(37, 99, 235, 0.05); }
+
+.btn-success {
+  background: linear-gradient(135deg, var(--brand-success), #059669);
+  color: white;
+}
+
+/* ── COST IMPACT SUMMARY ── */
+.cost-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cost-card {
+  padding: 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.cost-card .cost-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.cost-card .cost-value {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cost-card .cost-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  transition: var(--transition);
+}
+.modal-close:hover { background: var(--brand-danger); color: white; }
+
+.modal-body { padding: 24px; }
+
+.modal-body .success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 16px;
+}
+
+.modal-body h4 { text-align: center; font-size: 18px; margin-bottom: 8px; }
+.modal-body .modal-desc { text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  font-size: 14px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row .dr-label { color: var(--text-secondary); }
+.detail-row .dr-value { font-weight: 600; }
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .main { padding: 80px 16px 16px; }
+  .score-banner { grid-template-columns: 1fr; text-align: center; }
+  .score-stats { flex-direction: row; justify-content: center; gap: 24px; }
+  .stat-item { text-align: center; }
+  .analysis-grid { grid-template-columns: 1fr; }
+  .motion-options { grid-template-columns: 1fr; }
+  .cost-summary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .navbar { padding: 0 16px; }
+  .upload-zone { padding: 32px 16px; }
+  .cost-summary { grid-template-columns: 1fr; }
+}
+
+/* ── AUTO-DETECT BANNER ── */
+.auto-detect-banner {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: var(--radius);
+  font-size: 13px;
+  animation: slideDown 0.3s ease;
+}
+.auto-detect-banner.visible { display: flex; }
+.auto-detect-banner .adb-icon { font-size: 20px; }
+.auto-detect-banner .adb-text { flex: 1; }
+.auto-detect-banner .adb-text strong { color: var(--brand-accent); }
+.auto-detect-banner .adb-dismiss {
+  background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px;
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── BATCH UPLOAD ── */
+.batch-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.batch-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.batch-tab:hover { border-color: var(--brand-primary); }
+.batch-tab.active { background: rgba(37, 99, 235, 0.15); border-color: var(--brand-primary); color: var(--brand-primary-light); }
+.batch-queue { display: none; margin-bottom: 16px; }
+.batch-queue.visible { display: block; }
+.batch-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.batch-item .bi-status { width: 20px; text-align: center; }
+.batch-item .bi-name { flex: 1; font-weight: 500; }
+.batch-item .bi-size { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.batch-item .bi-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; }
+.batch-item .bi-remove:hover { color: var(--brand-danger); }
+
+/* ── COURT DATE COUNTDOWN ── */
+.countdown-bar {
+  display: none;
+  padding: 20px 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+.countdown-bar.visible { display: block; }
+.countdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.countdown-header h4 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.countdown-header .court-info { font-size: 12px; color: var(--text-secondary); }
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cd-unit {
+  text-align: center;
+  padding: 12px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+}
+.cd-unit .cd-num {
+  font-size: 32px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--brand-accent);
+  line-height: 1;
+}
+.cd-unit .cd-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.countdown-deadlines {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cd-deadline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+.cd-deadline .cd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cd-deadline .cd-dot.urgent { background: var(--brand-danger); }
+.cd-deadline .cd-dot.soon { background: var(--brand-warning); }
+.cd-deadline .cd-dot.ok { background: var(--brand-success); }
+
+/* ── AI RECOMMENDATION ── */
+.ai-recommendation {
+  display: none;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(6, 182, 212, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+.ai-recommendation.visible { display: block; }
+.ai-rec-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ai-rec-header .ai-sparkle { font-size: 16px; }
+.ai-rec-body { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+.ai-rec-body strong { color: var(--text-primary); }
+.ai-rec-strategy {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.ai-rec-strategy .strategy-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.strategy-step .step-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── DEFENSE PLAYBOOK ── */
+.playbook {
+  display: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.playbook.visible { display: block; }
+.playbook h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.playbook .subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+.playbook-timeline { position: relative; padding-left: 32px; }
+.playbook-timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.pb-step {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: var(--transition);
+  cursor: pointer;
+}
+.pb-step:hover { border-color: var(--brand-primary); }
+.pb-step.completed { opacity: 0.6; }
+.pb-step.completed .pb-check { background: var(--brand-success); border-color: var(--brand-success); }
+.pb-check {
+  position: absolute;
+  left: -32px;
+  top: 16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  z-index: 2;
+  transition: var(--transition);
+}
+.pb-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.pb-step-title { font-weight: 600; font-size: 14px; }
+.pb-step-timing {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.pb-step-timing.now { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+.pb-step-timing.soon { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.pb-step-timing.later { background: rgba(37, 99, 235, 0.15); color: var(--brand-primary-light); }
+.pb-step-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.pb-auto-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--brand-accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── DEFENSE LETTER PREVIEW ── */
+.letter-preview {
+  display: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.letter-preview.visible { display: block; }
+.letter-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.letter-preview-header h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.letter-actions { display: flex; gap: 8px; }
+.letter-actions .btn { padding: 8px 14px; font-size: 12px; }
+.letter-body {
+  padding: 32px 40px;
+  background: #fafaf8;
+  color: #1a1a1a;
+  font-family: 'Times New Roman', Georgia, serif;
+  font-size: 14px;
+  line-height: 1.8;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.letter-body .letter-header-block { text-align: right; margin-bottom: 24px; color: #555; font-size: 13px; }
+.letter-body .letter-re { font-weight: 700; margin: 16px 0; }
+.letter-body .letter-greeting { margin-bottom: 16px; }
+.letter-body .letter-para { margin-bottom: 14px; text-align: justify; }
+.letter-body .letter-list { margin: 12px 0 12px 24px; }
+.letter-body .letter-list li { margin-bottom: 8px; }
+.letter-body .letter-closing { margin-top: 24px; }
+.letter-body .letter-sig { margin-top: 32px; font-style: italic; }
+
+/* ── RISK MATRIX ── */
+.risk-matrix {
+  display: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.risk-matrix.visible { display: block; }
+.risk-matrix h4 { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.risk-grid {
+  display: grid;
+  grid-template-columns: 120px repeat(3, 1fr);
+  gap: 2px;
+}
+.risk-cell {
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.risk-cell.header { background: var(--surface-3); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.risk-cell.row-label { background: var(--surface-3); color: var(--text-secondary); text-align: left; display: flex; align-items: center; }
+.risk-cell.low-risk { background: rgba(16, 185, 129, 0.15); color: var(--brand-success); }
+.risk-cell.med-risk { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.risk-cell.high-risk { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+.risk-cell.your-case {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: -2px;
+  position: relative;
+}
+.risk-cell.your-case::after {
+  content: '← YOU';
+  position: absolute;
+  right: -40px;
+  font-size: 10px;
+  color: var(--brand-accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── NOTIFICATION TOAST ── */
+.toast-stack {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  padding: 14px 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.3s ease;
+  pointer-events: auto;
+  max-width: 380px;
+}
+.toast.success { border-left: 3px solid var(--brand-success); }
+.toast.info { border-left: 3px solid var(--brand-accent); }
+.toast.warn { border-left: 3px solid var(--brand-warning); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ── FEE MANAGEMENT PANEL ── */
+.fee-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 400;
+  backdrop-filter: blur(4px);
+}
+.fee-overlay.open { display: block; }
+
+.fee-panel {
+  position: fixed;
+  top: 0;
+  right: -600px;
+  width: 600px;
+  height: 100vh;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border);
+  z-index: 401;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+  box-shadow: -10px 0 40px rgba(0,0,0,0.4);
+}
+.fee-panel.open { right: 0; }
+
+.fee-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.fee-panel-header h3 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+.fee-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.fee-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+}
+.fee-tab:hover { color: var(--text-primary); }
+.fee-tab.active { color: var(--brand-accent); border-bottom-color: var(--brand-accent); }
+
+.fee-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.fee-panel-body::-webkit-scrollbar { width: 6px; }
+.fee-panel-body::-webkit-scrollbar-track { background: transparent; }
+.fee-panel-body::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+
+.fee-search {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  margin-bottom: 12px;
+  outline: none;
+}
+.fee-search:focus { border-color: var(--brand-primary); }
+
+.fee-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.fee-category-header h4 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fee-cat-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.fee-cat-badge.infraction { background: rgba(37, 99, 235, 0.15); color: var(--brand-primary-light); }
+.fee-cat-badge.misdemeanor { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); }
+.fee-cat-badge.felony { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+.fee-cat-badge.nonmoving { background: rgba(139, 92, 246, 0.15); color: var(--brand-purple); }
+.fee-cat-badge.gross { background: rgba(239, 68, 68, 0.15); color: var(--brand-danger); }
+
+.fee-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 40px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  font-size: 13px;
+}
+.fee-row:last-child { border-bottom: none; }
+.fee-row .fee-name { line-height: 1.4; }
+.fee-row .fee-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+  outline: none;
+  transition: var(--transition);
+}
+.fee-row .fee-input:focus { border-color: var(--brand-accent); }
+.fee-row .fee-input.modified { border-color: var(--brand-warning); background: rgba(245, 158, 11, 0.08); }
+.fee-row .fee-reset {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  opacity: 0;
+}
+.fee-row:hover .fee-reset { opacity: 1; }
+.fee-row .fee-reset:hover { background: var(--surface-3); color: var(--brand-danger); }
+
+/* Court fees */
+.court-group {
+  margin-bottom: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.court-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.court-group-header:hover { background: var(--surface-3); }
+.court-group-header h4 { font-size: 14px; font-weight: 600; }
+.court-group-header .court-count { font-size: 11px; color: var(--text-muted); }
+.court-group-body { display: none; }
+.court-group.expanded .court-group-body { display: block; }
+.court-group.expanded .court-chevron { transform: rotate(180deg); }
+.court-chevron { font-size: 10px; color: var(--text-muted); transition: var(--transition); }
+
+.court-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 110px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(51, 65, 85, 0.3);
+  font-size: 13px;
+}
+.court-row .court-name-cell { line-height: 1.3; }
+.court-row .court-city { font-size: 11px; color: var(--text-muted); }
+.court-row .comp-range {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+}
+.court-row .fee-input { text-align: right; }
+
+.fee-panel-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.fee-panel-footer .fee-stats { font-size: 12px; color: var(--text-muted); }
+.fee-panel-footer .fee-stats strong { color: var(--brand-accent); }
+
+.fee-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+}
+.fee-add-row input {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+}
+.fee-add-row input:focus { border-color: var(--brand-primary); }
+.fee-add-btn {
+  padding: 8px 14px;
+  background: var(--brand-primary);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .fee-panel { width: 100%; right: -100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    Ticket<span>Shield</span> AI
+  </div>
+  <div class="nav-right">
+    <div class="jurisdiction-selector">
+      <button class="jurisdiction-btn" id="jurisdictionBtn" onclick="toggleJurisdiction()">
+        <span class="state-flag" id="selectedStateFlag">🏛️</span>
+        <span id="selectedStateName">Select Jurisdiction</span>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="jurisdiction-dropdown" id="jurisdictionDropdown">
+        <div class="jd-search">
+          <input type="text" placeholder="Search state or county..." id="stateSearch" oninput="filterStates()">
+        </div>
+        <div class="jd-list" id="stateList"></div>
+      </div>
+    </div>
+    <button class="jurisdiction-btn" onclick="toggleFeePanel()" style="gap:6px;">
+      <span style="font-size:16px;">💲</span>
+      <span>Fee Manager</span>
+    </button>
+    <div class="user-avatar">JS</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Auto-detect banner -->
+  <div class="auto-detect-banner" id="autoDetectBanner">
+    <span class="adb-icon">🎯</span>
+    <span class="adb-text"><strong>Auto-Detected:</strong> <span id="autoDetectText">California (CVC jurisdiction) — based on citation header and court name</span></span>
+    <button class="adb-dismiss" onclick="this.parentElement.classList.remove('visible')">✕</button>
+  </div>
+
+  <!-- Upload -->
+  <section class="upload-section">
+    <div class="batch-tabs">
+      <button class="batch-tab active" onclick="setBatchMode(false, this)">Single Citation</button>
+      <button class="batch-tab" onclick="setBatchMode(true, this)">Batch Upload</button>
+    </div>
+    <div class="upload-zone" id="uploadZone">
+      <span class="upload-icon">📄</span>
+      <h3>Upload Traffic Citation</h3>
+      <p>Drag & drop your ticket image or PDF, or <span class="browse-link" onclick="document.getElementById('fileInput').click()">browse files</span></p>
+      <div class="upload-formats">
+        <span>JPG</span><span>PNG</span><span>PDF</span><span>HEIC</span>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf,.heic">
+    <div class="batch-queue" id="batchQueue"></div>
+    <div class="file-preview" id="filePreview">
+      <div class="file-icon">📎</div>
+      <div class="file-info">
+        <div class="file-name" id="fileName"></div>
+        <div class="file-size" id="fileSize"></div>
+      </div>
+      <button class="remove-file" onclick="removeFile()">✕</button>
+    </div>
+    <!-- Citation Preview & OCR -->
+    <div class="citation-preview" id="citationPreview">
+      <div class="citation-preview-header">
+        <span>📋 Citation Document Preview</span>
+        <span class="file-type-badge" id="fileTypeBadge">JPG</span>
+      </div>
+      <div class="citation-preview-body">
+        <div class="preview-image-pane" id="previewImagePane"></div>
+        <div class="ocr-pane" id="ocrPane">
+          <div class="ocr-header"><div class="pulse"></div> Extracted Fields (OCR)</div>
+          <div id="ocrFields"></div>
+          <div class="ocr-summary" id="ocrSummary"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analyze -->
+  <div class="analyze-bar">
+    <button class="analyze-btn" id="analyzeBtn" disabled onclick="runAnalysis()">
+      <span class="btn-text">⚡ Analyze Citation</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div class="analysis-progress" id="analysisProgress">
+    <div class="progress-header">
+      <h4>🔍 AI Analysis in Progress</h4>
+      <span class="pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-steps" id="progressSteps">
+      <div class="progress-step" data-step="ocr"><div class="step-icon">1</div> OCR & Text Extraction</div>
+      <div class="progress-step" data-step="statute"><div class="step-icon">2</div> Statute Lookup & Matching</div>
+      <div class="progress-step" data-step="procedural"><div class="step-icon">3</div> Procedural Defect Scan</div>
+      <div class="progress-step" data-step="officer"><div class="step-icon">4</div> Officer Certification Check</div>
+      <div class="progress-step" data-step="equipment"><div class="step-icon">5</div> Equipment Calibration Review</div>
+      <div class="progress-step" data-step="signage"><div class="step-icon">6</div> Signage & Notice Requirements</div>
+      <div class="progress-step" data-step="constitutional"><div class="step-icon">7</div> Constitutional Challenge Scan</div>
+      <div class="progress-step" data-step="historical"><div class="step-icon">8</div> Historical Dismissal Lookup</div>
+      <div class="progress-step" data-step="insurance"><div class="step-icon">9</div> Insurance Impact Calculation</div>
+      <div class="progress-step" data-step="points"><div class="step-icon">10</div> Points Impact Analysis</div>
+      <div class="progress-step" data-step="signature"><div class="step-icon">11</div> Officer Signature Verification</div>
+      <div class="progress-step" data-step="deadlines"><div class="step-icon">12</div> Deadline & Continuance Scan</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-container" id="resultsContainer">
+
+    <!-- Cost Impact -->
+    <div class="cost-summary">
+      <div class="cost-card">
+        <div class="cost-label">Citation Fine</div>
+        <div class="cost-value" style="color: var(--brand-danger);">$285</div>
+        <div class="cost-sub">Base fine + surcharges</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-label">Insurance Impact</div>
+        <div class="cost-value" style="color: var(--brand-warning);">$2,340</div>
+        <div class="cost-sub">Estimated over 3 years</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-label">Points at Risk</div>
+        <div class="cost-value" style="color: var(--brand-purple);">2 pts</div>
+        <div class="cost-sub">Toward license suspension</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-label">Total Exposure</div>
+        <div class="cost-value" style="color: var(--brand-danger);">$2,625</div>
+        <div class="cost-sub">Fine + insurance + fees</div>
+      </div>
+    </div>
+
+    <!-- Score Banner -->
+    <div class="score-banner">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="bg" cx="60" cy="60" r="54"/>
+          <circle class="fill" id="scoreCircle" cx="60" cy="60" r="54"/>
+        </svg>
+        <div class="score-text">
+          <div class="score-number" id="scoreNumber">0</div>
+          <div class="score-label">Defense</div>
+        </div>
+      </div>
+      <div class="score-summary">
+        <h2>Excellent Grounds for Dismissal</h2>
+        <p>Our AI identified <strong>3 procedural defects</strong>, <strong>2 equipment issues</strong>, a <strong>critical signature violation</strong>, and <strong>4 additional deficiencies</strong> in your citation. The officer signature field contains a numeric ID instead of a legal signature — a facially defective citation. Based on historical data, similar cases have an <strong>84% dismissal rate</strong> when contested.</p>
+      </div>
+      <div class="score-stats">
+        <div class="stat-item danger">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Issues Found</div>
+        </div>
+        <div class="stat-item warning">
+          <div class="stat-value">6</div>
+          <div class="stat-label">Defenses Available</div>
+        </div>
+        <div class="stat-item success">
+          <div class="stat-value">84%</div>
+          <div class="stat-label">Est. Dismissal Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Cards -->
+    <div class="analysis-grid">
+
+      <!-- Procedural Defects -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon red">⚠️</div>
+            <span class="card-title">Procedural Defect Scan</span>
+          </div>
+          <span class="card-badge found">3 Found</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot critical"></div><div>Court filing date exceeds statutory 30-day window — citation filed on day 34. This is grounds for automatic dismissal under CVC §40513.</div></div>
+          <div class="finding-item"><div class="finding-dot critical"></div><div>Officer badge number field is blank. Required under state procedural code §1234.5 for valid citation issuance.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div>Violation location description is vague — "near intersection" lacks required specificity for due process notice requirements.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill high" style="width: 90%"></div></div>
+            <span class="value" style="color: var(--brand-danger);">Critical</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statute Lookup -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon blue">📜</div>
+            <span class="card-title">Statute Lookup & Matching</span>
+          </div>
+          <span class="card-badge warning">Review</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot warning"></div><div>Cited statute CVC §22350 (basic speed law) requires prosecution to prove speed was unsafe for conditions — not merely over posted limit.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Speed survey for this road segment expired 14 months ago. Under CVC §40802(b), this may constitute a speed trap defense.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 65%"></div></div>
+            <span class="value" style="color: var(--brand-warning);">Strong</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Officer Certification -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon purple">👮</div>
+            <span class="card-title">Officer Certification</span>
+          </div>
+          <span class="card-badge clear">Verified</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot success"></div><div>Officer POST certification is current and valid through 2027. LIDAR operator certification confirmed on file.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Officer has issued 847 citations this year. Discovery request for error rate may reveal patterns.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill low" style="width: 25%"></div></div>
+            <span class="value" style="color: var(--brand-success);">Low</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Equipment Calibration -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon amber">📡</div>
+            <span class="card-title">Equipment Calibration</span>
+          </div>
+          <span class="card-badge found">2 Issues</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot critical"></div><div>LIDAR unit (LTI TruSpeed S) last calibration was 387 days ago. Manufacturer requires annual calibration — unit was out of compliance at time of citation.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div>No tuning fork test documented for the shift. Department policy requires pre-shift and post-shift verification tests.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill high" style="width: 85%"></div></div>
+            <span class="value" style="color: var(--brand-danger);">Critical</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signage Requirements -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon cyan">🪧</div>
+            <span class="card-title">Signage & Notice Requirements</span>
+          </div>
+          <span class="card-badge info">Flagged</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot info"></div><div>Speed limit sign placement at citation location appears compliant based on mapping data. Sign visible 500ft prior to enforcement zone.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div>Construction zone sign was posted but no workers were present. Enhanced penalty may not apply under state "workers present" requirement.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 50%"></div></div>
+            <span class="value" style="color: var(--brand-warning);">Moderate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Constitutional Challenges -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon green">⚖️</div>
+            <span class="card-title">Constitutional Challenges</span>
+          </div>
+          <span class="card-badge clear">None</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot success"></div><div>No automated camera system involved — Sixth Amendment confrontation clause challenge not applicable.</div></div>
+          <div class="finding-item"><div class="finding-dot success"></div><div>Due process rights appear preserved. Proper notice and opportunity to appear documented on citation face.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill low" style="width: 10%"></div></div>
+            <span class="value" style="color: var(--brand-success);">N/A</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historical Dismissal -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon blue">📊</div>
+            <span class="card-title">Historical Dismissal Rates</span>
+          </div>
+          <span class="card-badge info">Data</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot info"></div><div>This court dismisses 34% of speeding citations when contested. Rate increases to 72% when equipment calibration defenses are raised.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Assigned Judge Martinez has a 41% dismissal rate — above county average of 28%. Tends to scrutinize calibration records closely.</div></div>
+          <div class="finding-item"><div class="finding-dot success"></div><div>Trial by Written Declaration success rate for this violation type: 45%. Recommended as first strategy before in-person appearance.</div></div>
+        </div>
+      </div>
+
+      <!-- Insurance Impact -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon amber">💰</div>
+            <span class="card-title">Insurance & Points Impact</span>
+          </div>
+          <span class="card-badge warning">High</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot critical"></div><div>Conviction adds 2 points to driving record. You currently have 1 point — reaching 4 within 12 months triggers a negligent operator hearing.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div>Estimated insurance premium increase: $65/month ($2,340 over 3 years). Based on your carrier tier and violation history.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Traffic school eligibility: YES. Completing traffic school masks the point but does not prevent insurance surcharge in all cases.</div></div>
+        </div>
+      </div>
+
+      <!-- Officer Signature Verification -->
+      <div class="analysis-card" style="grid-column: 1 / -1;">
+        <div class="card-header" style="border-bottom-color: var(--brand-danger);">
+          <div class="card-header-left">
+            <div class="card-icon red">✍️</div>
+            <span class="card-title">Officer Signature Verification</span>
+          </div>
+          <span class="card-badge found">Violation</span>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px;">Signature Field Analysis</div>
+
+              <div style="background: var(--surface-3); border: 2px solid var(--brand-danger); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative;">
+                <div style="position: absolute; top: -10px; left: 12px; background: var(--brand-danger); color: white; font-size: 10px; padding: 2px 10px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Anomaly Detected</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 22px; text-align: center; padding: 16px 0; color: var(--text-primary); letter-spacing: 2px; border-bottom: 2px solid var(--text-muted);">4789201</div>
+                <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 8px;">OFFICER SIGNATURE LINE</div>
+              </div>
+
+              <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Numeric ID substituted for signature.</strong> The officer signature field contains only a badge/ID number ("4789201") instead of a handwritten or electronic signature. This is not a valid legal signature under most state statutes.</div></div>
+              <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Sworn declaration issue.</strong> A traffic citation is a sworn document. Most states require the officer's actual signature to affirm under penalty of perjury that the facts are true. A numeric identifier does not satisfy this oath requirement.</div></div>
+              <div class="finding-item"><div class="finding-dot warning"></div><div><strong>No electronic signature indicator.</strong> If this were an authorized e-signature, it would typically include a "/s/" prefix, a digital certificate hash, or an e-signature system watermark. None detected.</div></div>
+            </div>
+
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px;">Signature Classification</div>
+
+              <div style="background: var(--surface-3); border-radius: var(--radius); padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-size: 13px;">Detection Type</span>
+                  <span style="font-size: 13px; font-weight: 700; color: var(--brand-danger); font-family: 'JetBrains Mono', monospace;">NUMERIC ONLY</span>
+                </div>
+                <div style="display: flex; gap: 6px; margin-bottom: 16px;">
+                  <div style="flex: 1; height: 28px; background: var(--brand-danger); border-radius: 4px 0 0 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600;">NUMERIC</div>
+                  <div style="flex: 1; height: 28px; background: var(--surface-4); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">PRINTED</div>
+                  <div style="flex: 1; height: 28px; background: var(--surface-4); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">E-SIG</div>
+                  <div style="flex: 1; height: 28px; background: var(--surface-4); border-radius: 0 4px 4px 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">INK</div>
+                </div>
+
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;">Statutory Requirements</div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">CVC §40500(a) — Officer "shall" sign the citation in the presence of the defendant</div></div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">Penal Code §853.9 — Citation must be signed under penalty of perjury by the issuing officer</div></div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">UCC §1-201(37) / ESIGN Act — A number alone does not constitute intent to sign</div></div>
+                <div class="finding-item" style="padding: 6px 0; border: none;"><div class="finding-dot warning"></div><div style="font-size: 12px;">State v. Hernandez (2019) — Court held numeric ID insufficient as officer signature on citation</div></div>
+              </div>
+
+              <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius); padding: 14px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span style="font-size: 16px;">🚨</span>
+                  <span style="font-weight: 700; font-size: 13px; color: var(--brand-danger);">High-Confidence Defense Vector</span>
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">A citation lacking a valid officer signature is facially defective and may be subject to dismissal on procedural grounds. This defect cannot be cured retroactively — the signature must exist at the time of issuance.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="impact-meter" style="margin-top: 20px;">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill high" style="width: 95%"></div></div>
+            <span class="value" style="color: var(--brand-danger);">Critical</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service & Delivery Deficiencies -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon red">📬</div>
+            <span class="card-title">Service & Delivery Defects</span>
+          </div>
+          <span class="card-badge found">2 Found</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Defendant copy not provided at scene.</strong> Officer failed to deliver a copy of the citation to the driver at the time of issuance. Under CVC §40500(b), failure to provide a copy renders the citation voidable.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Mailed copy sent to wrong address.</strong> Court copy was mailed to a prior address on file rather than the address listed on the driver's current license, potentially violating proper service requirements.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>No proof of service affidavit filed with the court within the statutory window. This creates a jurisdictional challenge opportunity.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill high" style="width: 80%"></div></div>
+            <span class="value" style="color: var(--brand-danger);">Critical</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deadline & Continuance Analysis -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon purple">📅</div>
+            <span class="card-title">Deadline & Continuance Scan</span>
+          </div>
+          <span class="card-badge warning">Alert</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Speedy trial right triggered.</strong> Arraignment date is 62 days from citation date. If defendant asserts speedy trial rights, prosecution must be ready within 45 days in this jurisdiction — the window has lapsed.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div><strong>Continuance opportunity.</strong> If the citing officer is unavailable on the court date, you may request dismissal rather than a continuance. Officer no-show rate for this precinct: 18%.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Court date falls on a holiday-adjacent Friday. Historical data shows 23% higher officer no-show rate on these dates in this court.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 60%"></div></div>
+            <span class="value" style="color: var(--brand-warning);">Strong</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Witness & Evidence Gaps -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon cyan">🔍</div>
+            <span class="card-title">Witness & Evidence Gaps</span>
+          </div>
+          <span class="card-badge warning">3 Gaps</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>No dashcam/bodycam reference.</strong> Citation does not reference any video recording. A discovery request for dashcam footage may reveal discrepancies with the officer's written account, or reveal footage was not preserved (spoliation argument).</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>No corroborating witness.</strong> Single-officer stop with no partner or backup unit listed. Credibility challenge is stronger when testimony is uncorroborated by independent evidence.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div><strong>Weather/visibility not documented.</strong> Citation weather field is blank. If conditions were poor, officer's visual speed estimate and LIDAR accuracy are both subject to challenge.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 55%"></div></div>
+            <span class="value" style="color: var(--brand-warning);">Moderate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chain of Custody & Documentation -->
+      <div class="analysis-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon green">🔗</div>
+            <span class="card-title">Chain of Custody & Documentation</span>
+          </div>
+          <span class="card-badge found">Deficient</span>
+        </div>
+        <div class="card-body">
+          <div class="finding-item"><div class="finding-dot critical"></div><div><strong>LIDAR serial number mismatch.</strong> The equipment serial number on the citation does not match the serial number in the department's most recent calibration log for this officer's assigned unit. This breaks evidentiary chain of custody.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>No vehicle identification verification.</strong> Citation lists vehicle color as "BLU" but registered color for the plate is "GRY." This discrepancy undermines identification of the correct vehicle.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Shift log request recommended — verify the citing officer was actually on duty and assigned to the enforcement zone at the documented time of stop.</div></div>
+          <div class="impact-meter">
+            <span class="label">Defense Strength</span>
+            <div class="impact-bar"><div class="impact-bar-fill high" style="width: 75%"></div></div>
+            <span class="value" style="color: var(--brand-danger);">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Court Date Countdown -->
+    <div class="countdown-bar visible" id="countdownBar">
+      <div class="countdown-header">
+        <h4>⏱️ Court Date Countdown</h4>
+        <span class="court-info">Superior Court — Traffic Div · Dept 42 · Case TR-2026-0847291</span>
+      </div>
+      <div class="countdown-grid">
+        <div class="cd-unit"><div class="cd-num" id="cdDays">26</div><div class="cd-label">Days</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdHours">14</div><div class="cd-label">Hours</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdMins">32</div><div class="cd-label">Minutes</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdSecs">08</div><div class="cd-label">Seconds</div></div>
+      </div>
+      <div class="countdown-deadlines">
+        <div class="cd-deadline"><div class="cd-dot urgent"></div><strong>Written Declaration:</strong>&nbsp;5 days left</div>
+        <div class="cd-deadline"><div class="cd-dot soon"></div><strong>Discovery Request:</strong>&nbsp;12 days left</div>
+        <div class="cd-deadline"><div class="cd-dot ok"></div><strong>Motion Filing:</strong>&nbsp;19 days left</div>
+        <div class="cd-deadline"><div class="cd-dot ok"></div><strong>Court Appearance:</strong>&nbsp;Jul 24, 2026</div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div class="risk-matrix visible" id="riskMatrix">
+      <h4>📐 Defense Outcome Matrix</h4>
+      <div class="risk-grid">
+        <div class="risk-cell header"></div>
+        <div class="risk-cell header">Pay Fine</div>
+        <div class="risk-cell header">Contest (Self)</div>
+        <div class="risk-cell header">Contest (Attorney)</div>
+        <div class="risk-cell row-label">Cost</div>
+        <div class="risk-cell high-risk">$2,625</div>
+        <div class="risk-cell med-risk">$49 – $99</div>
+        <div class="risk-cell low-risk">$149 – $299</div>
+        <div class="risk-cell row-label">Dismiss Rate</div>
+        <div class="risk-cell high-risk">0%</div>
+        <div class="risk-cell med-risk">58%</div>
+        <div class="risk-cell low-risk your-case">84%</div>
+        <div class="risk-cell row-label">Insurance Hit</div>
+        <div class="risk-cell high-risk">$2,340 / 3yr</div>
+        <div class="risk-cell low-risk">$0 if won</div>
+        <div class="risk-cell low-risk">$0 if won</div>
+        <div class="risk-cell row-label">Points</div>
+        <div class="risk-cell high-risk">+2 pts</div>
+        <div class="risk-cell low-risk">0 if won</div>
+        <div class="risk-cell low-risk">0 if won</div>
+        <div class="risk-cell row-label">Time Required</div>
+        <div class="risk-cell low-risk">None</div>
+        <div class="risk-cell med-risk">4 – 8 hrs</div>
+        <div class="risk-cell low-risk">1 – 2 hrs</div>
+        <div class="risk-cell row-label">Expected Value</div>
+        <div class="risk-cell high-risk">-$2,625</div>
+        <div class="risk-cell med-risk">-$1,152</div>
+        <div class="risk-cell low-risk your-case">-$269</div>
+      </div>
+    </div>
+
+    <!-- AI Strategy Recommendation -->
+    <div class="ai-recommendation visible" id="aiRecommendation">
+      <div class="ai-rec-header"><span class="ai-sparkle">✨</span> AI-Recommended Defense Strategy</div>
+      <div class="ai-rec-body">
+        Based on <strong>12 identified defects</strong>, jurisdiction-specific case law, and an <strong>84% historical dismissal rate</strong> for similar defenses in this court, TicketShield AI recommends a <strong>two-phase layered defense</strong>:
+        <br><br>
+        <strong>Phase 1:</strong> File a <strong>Trial by Written Declaration</strong> — zero downside, 45% standalone success rate, and preserves your right to a full trial de novo if denied.
+        <br>
+        <strong>Phase 2:</strong> If Phase 1 is denied, file a <strong>Motion to Dismiss</strong> citing the invalid officer signature (numeric ID only), late filing (day 34 of 30), and LIDAR calibration failure. This combination has a <strong>78% success rate at trial</strong> in this court.
+      </div>
+      <div class="ai-rec-strategy">
+        <div class="strategy-step"><span class="step-num">1</span> Written Declaration (now)</div>
+        <div class="strategy-step"><span class="step-num">2</span> Discovery Request (day 3)</div>
+        <div class="strategy-step"><span class="step-num">3</span> Motion to Dismiss (day 14)</div>
+        <div class="strategy-step"><span class="step-num">4</span> Trial de novo (if needed)</div>
+      </div>
+    </div>
+
+    <!-- Defense Playbook -->
+    <div class="playbook visible" id="playbook">
+      <h3>📋 Automated Defense Playbook</h3>
+      <p class="subtitle">Step-by-step action plan generated from your citation analysis. Click steps to mark complete.</p>
+      <div class="playbook-timeline">
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">1</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">Submit FOIA Request for Calibration Records</span>
+            <span class="pb-step-timing now">Do Today</span>
+          </div>
+          <div class="pb-step-desc">Request LIDAR unit calibration log (S/N: TS-40921) and officer certification records from CHP Coastal Division via public records request. Template auto-generated below.</div>
+          <span class="pb-auto-tag">⚡ Auto-Generated</span>
+        </div>
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">2</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">File Trial by Written Declaration</span>
+            <span class="pb-step-timing now">Within 5 Days</span>
+          </div>
+          <div class="pb-step-desc">Submit TR-205 form with attached declaration citing officer signature defect, equipment calibration failure, and speed survey expiration. Bail deposit of $285 required.</div>
+          <span class="pb-auto-tag">⚡ Auto-Drafted</span>
+        </div>
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">3</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">Submit Discovery Request to Prosecution</span>
+            <span class="pb-step-timing soon">By Day 12</span>
+          </div>
+          <div class="pb-step-desc">Request dashcam footage, officer shift logs, tuning fork test records, and LIDAR maintenance history. Failure to produce within 15 days supports a motion to exclude evidence.</div>
+          <span class="pb-auto-tag">⚡ Auto-Generated</span>
+        </div>
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">4</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">Verify Google Street View for Signage Compliance</span>
+            <span class="pb-step-timing soon">By Day 12</span>
+          </div>
+          <div class="pb-step-desc">Capture and archive Street View imagery of enforcement location showing posted speed limit signs, construction zone markers, and sight distances. Screenshot with timestamp for evidence file.</div>
+        </div>
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">5</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">Prepare Motion to Dismiss (Backup)</span>
+            <span class="pb-step-timing later">By Day 19</span>
+          </div>
+          <div class="pb-step-desc">If Written Declaration is denied: file Motion to Dismiss citing CVC §40500(a) signature requirement violation, CVC §40513 late filing, and equipment chain-of-custody break. Request trial de novo.</div>
+          <span class="pb-auto-tag">⚡ Auto-Drafted</span>
+        </div>
+        <div class="pb-step" onclick="togglePlaybookStep(this)">
+          <div class="pb-check">6</div>
+          <div class="pb-step-header">
+            <span class="pb-step-title">Court Appearance Preparation</span>
+            <span class="pb-step-timing later">Day 25</span>
+          </div>
+          <div class="pb-step-desc">Review judge profile (Martinez — 41% dismissal rate), prepare cross-examination questions on calibration compliance, organize evidence binder with tabbed exhibits.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Defense Letter Preview -->
+    <div class="letter-preview visible" id="letterPreview">
+      <div class="letter-preview-header">
+        <h3>📄 Auto-Generated Defense Declaration</h3>
+        <div class="letter-actions">
+          <button class="btn btn-outline" onclick="copyLetter()">📋 Copy</button>
+          <button class="btn btn-outline" onclick="downloadLetter()">⬇️ Download .docx</button>
+          <button class="btn btn-primary" onclick="emailLetter()">📧 Email to Court</button>
+        </div>
+      </div>
+      <div class="letter-body">
+        <div class="letter-header-block">
+          Case No: TR-2026-0847291<br>
+          Date: June 28, 2026<br>
+          Defendant: Pro Se
+        </div>
+        <div class="letter-re">RE: Trial by Written Declaration — People v. Defendant, CVC §22350</div>
+        <div class="letter-greeting">Honorable Judge Martinez,</div>
+        <div class="letter-para">
+          I respectfully submit this Trial by Written Declaration pursuant to CVC §40902, contesting Citation No. TR-2026-0847291 issued on May 23, 2026, for an alleged violation of CVC §22350 (Unsafe Speed for Conditions) on Highway 101 NB near Main Street.
+        </div>
+        <div class="letter-para">
+          <strong>I. The Citation Is Facially Defective Due to Invalid Officer Signature</strong><br>
+          The officer signature field on the citation contains only a numeric identifier ("4789201") rather than an actual signature, whether handwritten or electronic. Under CVC §40500(a), the citing officer "shall" sign the notice to appear. Penal Code §853.9 further requires the citation be signed under penalty of perjury. A numeric badge number does not constitute a signature under the ESIGN Act (15 U.S.C. §7001) or UCC §1-201(37). See also <em>State v. Hernandez</em> (2019), holding that a numeric identifier is insufficient as an officer signature on a traffic citation.
+        </div>
+        <div class="letter-para">
+          <strong>II. The Citation Was Filed Beyond the Statutory Deadline</strong><br>
+          The citation was filed with the court on day 34 following issuance. CVC §40513 requires filing within 30 days. This untimely filing is grounds for dismissal as a matter of law.
+        </div>
+        <div class="letter-para">
+          <strong>III. The Speed Measurement Equipment Was Not Properly Calibrated</strong><br>
+          The LIDAR unit used (LTI TruSpeed S, S/N: TS-40921) was last calibrated 387 days prior to the citation date. The manufacturer requires annual calibration. Additionally, no tuning fork verification test was documented for the citing officer's shift, in violation of department policy. The reliability of the speed reading cannot be established.
+        </div>
+        <div class="letter-para">
+          <strong>IV. Speed Trap Defense Under CVC §40802(b)</strong><br>
+          The traffic and engineering survey for this road segment expired 14 months prior to the citation date. Under CVC §40802(b), enforcement of a speed limit based on an expired survey constitutes a speed trap, and evidence obtained thereby is inadmissible per CVC §40803.
+        </div>
+        <div class="letter-para">
+          Based on the foregoing defects — any one of which independently warrants dismissal — I respectfully request this citation be dismissed in its entirety.
+        </div>
+        <div class="letter-closing">Respectfully submitted,</div>
+        <div class="letter-sig">[Defendant Signature]<br>Date: _______________</div>
+      </div>
+    </div>
+
+    <!-- Attorney Review Panel -->
+    <div class="attorney-panel">
+      <h3>⚖️ Attorney Review & Motion Preparation</h3>
+      <p class="subtitle">Select a motion type for attorney review. Our AI will draft the motion with jurisdiction-specific case law and procedural arguments.</p>
+
+      <div class="motion-options">
+        <div class="motion-option" onclick="selectMotion(this, 'in-limine')" data-type="in-limine">
+          <div class="radio"></div>
+          <h4>Motion in Limine</h4>
+          <p>Pre-trial motion to exclude unreliable evidence — specifically the LIDAR reading from an uncalibrated device and undocumented tuning fork test results.</p>
+          <span class="motion-tag pre-trial">Pre-Trial</span>
+        </div>
+        <div class="motion-option" onclick="selectMotion(this, 'dismissal')" data-type="dismissal">
+          <div class="radio"></div>
+          <h4>Motion to Dismiss</h4>
+          <p>Challenge the citation on procedural grounds — late filing beyond statutory deadline and missing required officer identification on the citation face.</p>
+          <span class="motion-tag dismissal">Dismissal</span>
+        </div>
+        <div class="motion-option" onclick="selectMotion(this, 'suppress')" data-type="suppress">
+          <div class="radio"></div>
+          <h4>Motion to Suppress</h4>
+          <p>Exclude speed measurement evidence obtained through equipment that failed to meet manufacturer calibration requirements at time of enforcement.</p>
+          <span class="motion-tag pre-trial">Pre-Trial</span>
+        </div>
+        <div class="motion-option" onclick="selectMotion(this, 'declaration')" data-type="declaration">
+          <div class="radio"></div>
+          <h4>Trial by Written Declaration</h4>
+          <p>Contest the citation by mail without a court appearance. If denied, you retain the right to a new trial de novo in person — zero downside strategy.</p>
+          <span class="motion-tag dismissal">No Appearance</span>
+        </div>
+      </div>
+
+      <div class="attorney-actions">
+        <button class="btn btn-primary" id="prepareMotionBtn" onclick="prepareMotion()" disabled>
+          📝 Prepare Motion Draft
+        </button>
+        <button class="btn btn-outline" onclick="openModal()">
+          👤 Connect with Attorney
+        </button>
+        <button class="btn btn-success" onclick="downloadReport()">
+          ⬇️ Export Full Report
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Fee Management Panel -->
+<div class="fee-overlay" id="feeOverlay" onclick="closeFeePanel()"></div>
+<div class="fee-panel" id="feePanel">
+  <div class="fee-panel-header">
+    <h3>💲 Fee Management — Nevada</h3>
+    <button class="modal-close" onclick="closeFeePanel()">✕</button>
+  </div>
+  <div class="fee-tabs">
+    <button class="fee-tab active" onclick="switchFeeTab('violations', this)">Violation Fees</button>
+    <button class="fee-tab" onclick="switchFeeTab('courts', this)">Court Coverage</button>
+  </div>
+  <div class="fee-panel-body" id="feePanelBody"></div>
+  <div class="fee-panel-footer">
+    <div class="fee-stats" id="feeStats"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" onclick="resetAllFees()" style="padding:8px 14px;font-size:12px;">Reset All</button>
+      <button class="btn btn-primary" onclick="saveFees()" style="padding:8px 14px;font-size:12px;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Stack -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- Attorney Connect Modal -->
+<div class="modal-overlay" id="attorneyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Connect with a Reviewing Attorney</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="success-icon">⚖️</div>
+      <h4>Attorney Review Request</h4>
+      <p class="modal-desc">A licensed attorney in your jurisdiction will review the AI analysis, verify defense strategies, and prepare court-ready filings.</p>
+      <div class="detail-row"><span class="dr-label">Jurisdiction</span><span class="dr-value" id="modalState">California</span></div>
+      <div class="detail-row"><span class="dr-label">Violation</span><span class="dr-value">CVC §22350 — Speeding</span></div>
+      <div class="detail-row"><span class="dr-label">Selected Motion</span><span class="dr-value" id="modalMotion">—</span></div>
+      <div class="detail-row"><span class="dr-label">AI Confidence</span><span class="dr-value" style="color: var(--brand-success);">72% dismissal likelihood</span></div>
+      <div class="detail-row"><span class="dr-label">Attorney Fee</span><span class="dr-value">$149 flat rate</span></div>
+      <div class="detail-row"><span class="dr-label">Turnaround</span><span class="dr-value">24–48 hours</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAttorneyRequest()">Submit Request →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE DATA ──
+const states = [
+  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+  { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' }
+];
+
+let selectedState = null;
+let defaultState = localStorage.getItem('ts_default_state') || null;
+let selectedMotion = null;
+let uploadedFile = null;
+let batchMode = false;
+let batchFiles = [];
+let countdownInterval = null;
+let autoAnalyze = true;
+
+// ── JURISDICTION ──
+function renderStates(filter = '') {
+  const list = document.getElementById('stateList');
+  const filtered = states.filter(s =>
+    s.name.toLowerCase().includes(filter.toLowerCase()) ||
+    s.code.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = filtered.map(s => {
+    const isActive = selectedState === s.code;
+    const isDefault = defaultState === s.code;
+    return `<div class="jd-item ${isActive ? 'active' : ''}" onclick="selectState('${s.code}', '${s.name}')">
+      <span>${s.code} — ${s.name}</span>
+      ${isDefault ? '<span class="default-badge">Default</span>' : `<button class="set-default" onclick="event.stopPropagation(); setDefault('${s.code}', '${s.name}')">Set Default</button>`}
+    </div>`;
+  }).join('');
+}
+
+function toggleJurisdiction() {
+  const dd = document.getElementById('jurisdictionDropdown');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    renderStates();
+    setTimeout(() => document.getElementById('stateSearch').focus(), 50);
+  }
+}
+
+function filterStates() {
+  renderStates(document.getElementById('stateSearch').value);
+}
+
+function selectState(code, name) {
+  selectedState = code;
+  document.getElementById('selectedStateName').textContent = `${code} — ${name}`;
+  document.getElementById('selectedStateFlag').textContent = '🏛️';
+  document.getElementById('jurisdictionDropdown').classList.remove('open');
+  document.getElementById('modalState').textContent = name;
+  renderStates();
+}
+
+function setDefault(code, name) {
+  defaultState = code;
+  localStorage.setItem('ts_default_state', code);
+  selectState(code, name);
+  renderStates();
+}
+
+// Load default on init
+if (defaultState) {
+  const s = states.find(st => st.code === defaultState);
+  if (s) selectState(s.code, s.name);
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.jurisdiction-selector')) {
+    document.getElementById('jurisdictionDropdown').classList.remove('open');
+  }
+});
+
+// ── FILE UPLOAD ──
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+uploadZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function handleFile(file) {
+  if (batchMode) {
+    batchFiles.push(file);
+    renderBatchQueue();
+    return;
+  }
+  uploadedFile = file;
+  uploadZone.classList.add('has-file');
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatSize(file.size);
+  document.getElementById('filePreview').classList.add('visible');
+  document.getElementById('analyzeBtn').disabled = false;
+  renderCitationPreview(file);
+
+  // Auto-detect jurisdiction from file
+  setTimeout(() => autoDetectJurisdiction(file), 800);
+
+  // Auto-analyze after OCR completes
+  if (autoAnalyze) {
+    showToast('info', '🔍 Auto-analysis starting in 3 seconds...');
+    setTimeout(() => {
+      if (uploadedFile && !selectedState) selectState('CA', 'California');
+      runAnalysis();
+    }, 3000);
+  }
+}
+
+function removeFile() {
+  uploadedFile = null;
+  uploadZone.classList.remove('has-file');
+  document.getElementById('filePreview').classList.remove('visible');
+  document.getElementById('citationPreview').classList.remove('visible');
+  document.getElementById('autoDetectBanner').classList.remove('visible');
+  document.getElementById('analyzeBtn').disabled = true;
+  fileInput.value = '';
+  if (previewObjectURL) { URL.revokeObjectURL(previewObjectURL); previewObjectURL = null; }
+}
+
+let previewObjectURL = null;
+
+function renderCitationPreview(file) {
+  const preview = document.getElementById('citationPreview');
+  const imagePane = document.getElementById('previewImagePane');
+  const badge = document.getElementById('fileTypeBadge');
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (previewObjectURL) URL.revokeObjectURL(previewObjectURL);
+  previewObjectURL = URL.createObjectURL(file);
+
+  // Badge
+  badge.className = 'file-type-badge';
+  if (ext === 'pdf') { badge.textContent = 'PDF'; badge.classList.add('pdf'); }
+  else if (ext === 'png') { badge.textContent = 'PNG'; badge.classList.add('png'); }
+  else { badge.textContent = ext.toUpperCase(); badge.classList.add('jpg'); }
+
+  // Image pane
+  if (ext === 'pdf') {
+    imagePane.innerHTML = `<div style="width:100%;height:468px;"><embed src="${previewObjectURL}" type="application/pdf" width="100%" height="100%" style="border-radius:8px;" /></div>`;
+  } else {
+    const img = new Image();
+    img.src = previewObjectURL;
+    img.alt = 'Citation preview';
+    img.onload = () => {
+      imagePane.innerHTML = '';
+      imagePane.appendChild(img);
+    };
+    img.onerror = () => {
+      imagePane.innerHTML = '<div class="pdf-fallback"><span class="pdf-icon">🖼️</span>Unable to preview image</div>';
+    };
+    imagePane.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Loading preview...</div>';
+  }
+
+  preview.classList.add('visible');
+  simulateOCR(ext);
+}
+
+function simulateOCR(ext) {
+  const ocrFields = document.getElementById('ocrFields');
+  const ocrSummary = document.getElementById('ocrSummary');
+
+  const fields = [
+    { label: 'Citation Number', value: 'TR-2026-0847291', confidence: 'high', pct: '99%' },
+    { label: 'Issue Date', value: '05/23/2026', confidence: 'high', pct: '98%' },
+    { label: 'Court Date', value: '07/24/2026', confidence: 'high', pct: '97%' },
+    { label: 'Violation Code', value: 'CVC §22350', confidence: 'high', pct: '99%' },
+    { label: 'Violation Desc', value: 'UNSAFE SPEED FOR CONDITIONS', confidence: 'high', pct: '96%' },
+    { label: 'Posted Speed', value: '45 MPH', confidence: 'high', pct: '98%' },
+    { label: 'Alleged Speed', value: '72 MPH', confidence: 'high', pct: '95%' },
+    { label: 'Location', value: 'HWY 101 NB NEAR MAIN ST', confidence: 'medium', pct: '82%' },
+    { label: 'Officer Name', value: 'SGT. R. DOMINGUEZ', confidence: 'high', pct: '94%' },
+    { label: 'Badge Number', value: '—', confidence: 'low', pct: 'N/A', flagged: true, note: 'MISSING' },
+    { label: 'Agency', value: 'CHP — COASTAL DIV', confidence: 'high', pct: '97%' },
+    { label: 'Equipment', value: 'LIDAR — LTI TRUSPEED S', confidence: 'high', pct: '93%' },
+    { label: 'Serial Number', value: 'TS-40921', confidence: 'medium', pct: '88%' },
+    { label: 'Vehicle Plate', value: '8ABC123', confidence: 'high', pct: '99%' },
+    { label: 'Vehicle Color', value: 'BLU', confidence: 'medium', pct: '79%', flagged: true, note: 'REG MISMATCH' },
+    { label: 'Vehicle Make', value: 'TOYOTA', confidence: 'high', pct: '96%' },
+    { label: 'Driver License', value: 'D4827••••', confidence: 'high', pct: '97%' },
+    { label: 'Officer Signature', value: '4789201', confidence: 'low', pct: '—', flagged: true, note: 'NUMERIC ONLY' },
+    { label: 'Defendant Sig', value: 'PRESENT', confidence: 'high', pct: '91%' },
+    { label: 'Court Name', value: 'SUPERIOR CT — TRAFFIC DIV', confidence: 'high', pct: '95%' },
+    { label: 'Bail Amount', value: '$285.00', confidence: 'high', pct: '99%' },
+  ];
+
+  ocrFields.innerHTML = '';
+  let flagCount = 0;
+  let totalConf = 0;
+  let confCount = 0;
+
+  fields.forEach((f, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'ocr-field' + (f.flagged ? ' flagged' : '');
+      const confClass = f.confidence === 'high' ? 'high' : f.confidence === 'medium' ? 'medium' : 'low';
+      const noteTag = f.note ? ` <span style="font-size:10px;color:var(--brand-danger);margin-left:4px;">⚠ ${f.note}</span>` : '';
+      div.innerHTML = `
+        <span class="field-label">${f.label}</span>
+        <span class="field-value">${f.value}${noteTag}</span>
+        <span class="field-confidence ${confClass}">${f.pct}</span>
+      `;
+      ocrFields.appendChild(div);
+
+      if (f.flagged) flagCount++;
+      if (f.pct !== 'N/A' && f.pct !== '—') { totalConf += parseInt(f.pct); confCount++; }
+
+      if (i === fields.length - 1) {
+        const avg = confCount ? Math.round(totalConf / confCount) : 0;
+        ocrSummary.innerHTML = `📊 <strong>${fields.length}</strong> fields extracted &nbsp;·&nbsp; Avg confidence: <strong>${avg}%</strong> &nbsp;·&nbsp; <span style="color:var(--brand-danger);font-weight:600;">${flagCount} flagged anomalies</span>`;
+      }
+    }, i * 60);
+  });
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// ── ANALYSIS ──
+const analysisSteps = ['ocr','statute','procedural','officer','equipment','signage','constitutional','historical','insurance','points','signature','deadlines'];
+
+// placeholder for runAnalysis — defined below
+async function runAnalysis() {}
+
+function animateScore(target) {
+  const circle = document.getElementById('scoreCircle');
+  const number = document.getElementById('scoreNumber');
+  const circumference = 2 * Math.PI * 54;
+  const offset = circumference - (target / 100) * circumference;
+
+  circle.style.strokeDashoffset = offset;
+
+  let current = 0;
+  const interval = setInterval(() => {
+    current += 1;
+    number.textContent = current;
+    if (current >= target) clearInterval(interval);
+  }, 18);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── MOTIONS ──
+function selectMotion(el, type) {
+  document.querySelectorAll('.motion-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMotion = type;
+  document.getElementById('prepareMotionBtn').disabled = false;
+
+  const labels = { 'in-limine': 'Motion in Limine', 'dismissal': 'Motion to Dismiss', 'suppress': 'Motion to Suppress', 'declaration': 'Trial by Written Declaration' };
+  document.getElementById('modalMotion').textContent = labels[type] || type;
+}
+
+function prepareMotion() {
+  if (!selectedMotion) return;
+  const btn = document.getElementById('prepareMotionBtn');
+  btn.innerHTML = '<div class="spinner" style="display:block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></div> Drafting...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.innerHTML = '✅ Motion Draft Ready';
+    btn.disabled = false;
+    setTimeout(() => { btn.innerHTML = '📝 Prepare Motion Draft'; }, 3000);
+  }, 2500);
+}
+
+// ── MODAL ──
+function openModal() { document.getElementById('attorneyModal').classList.add('open'); }
+function closeModal() { document.getElementById('attorneyModal').classList.remove('open'); }
+
+function submitAttorneyRequest() {
+  closeModal();
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--brand-success);color:white;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,0.3);';
+  banner.textContent = '✓ Attorney review request submitted. You\'ll hear back within 24–48 hours.';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 5000);
+}
+
+function downloadReport() {
+  showToast('success', '⬇️ Full analysis report downloading...');
+}
+
+// ── TOAST NOTIFICATIONS ──
+function showToast(type, message, duration = 4000) {
+  const stack = document.getElementById('toastStack');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = message;
+  stack.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; toast.style.transition = '0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+}
+
+// ── AUTO-DETECT JURISDICTION ──
+function autoDetectJurisdiction(file) {
+  const stateMap = {
+    'CA': { name: 'California', hint: 'CVC jurisdiction — based on citation header and court name' },
+    'FL': { name: 'Florida', hint: 'FSS jurisdiction — based on Florida Statute references' },
+    'TX': { name: 'Texas', hint: 'TC jurisdiction — based on Texas Transportation Code references' },
+    'NY': { name: 'New York', hint: 'VTL jurisdiction — based on Vehicle & Traffic Law references' },
+    'IL': { name: 'Illinois', hint: 'ILCS jurisdiction — based on Illinois Compiled Statutes' },
+  };
+  // Simulate detection based on OCR
+  const detected = 'CA';
+  const info = stateMap[detected];
+  if (!selectedState || selectedState !== detected) {
+    selectState(detected, info.name);
+    document.getElementById('autoDetectText').textContent = `${info.name} (${info.hint})`;
+    document.getElementById('autoDetectBanner').classList.add('visible');
+    showToast('info', `🎯 Jurisdiction auto-detected: <strong>${info.name}</strong>`);
+  }
+}
+
+// ── BATCH MODE ──
+function setBatchMode(enabled, tabEl) {
+  batchMode = enabled;
+  document.querySelectorAll('.batch-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const queue = document.getElementById('batchQueue');
+  if (enabled) {
+    fileInput.setAttribute('multiple', '');
+    queue.classList.add('visible');
+    uploadZone.querySelector('h3').textContent = 'Upload Multiple Citations';
+    uploadZone.querySelector('p').innerHTML = 'Drag & drop multiple tickets, or <span class="browse-link" onclick="document.getElementById(\'fileInput\').click()">browse files</span>';
+  } else {
+    fileInput.removeAttribute('multiple');
+    queue.classList.remove('visible');
+    uploadZone.querySelector('h3').textContent = 'Upload Traffic Citation';
+    uploadZone.querySelector('p').innerHTML = 'Drag & drop your ticket image or PDF, or <span class="browse-link" onclick="document.getElementById(\'fileInput\').click()">browse files</span>';
+  }
+}
+
+function renderBatchQueue() {
+  const queue = document.getElementById('batchQueue');
+  queue.innerHTML = batchFiles.map((f, i) => `
+    <div class="batch-item">
+      <span class="bi-status">📄</span>
+      <span class="bi-name">${f.name}</span>
+      <span class="bi-size">${formatSize(f.size)}</span>
+      <button class="bi-remove" onclick="removeBatchFile(${i})">✕</button>
+    </div>
+  `).join('');
+  if (batchFiles.length > 0) {
+    document.getElementById('analyzeBtn').disabled = false;
+    queue.innerHTML += `<div style="text-align:right;margin-top:8px;font-size:12px;color:var(--text-muted);">${batchFiles.length} citation${batchFiles.length > 1 ? 's' : ''} queued</div>`;
+  }
+}
+
+function removeBatchFile(idx) {
+  batchFiles.splice(idx, 1);
+  renderBatchQueue();
+  if (batchFiles.length === 0) document.getElementById('analyzeBtn').disabled = true;
+}
+
+// Override file input for multi
+fileInput.addEventListener('change', () => {
+  const files = fileInput.files;
+  if (!files.length) return;
+  if (batchMode) {
+    for (let i = 0; i < files.length; i++) batchFiles.push(files[i]);
+    renderBatchQueue();
+  } else {
+    handleFile(files[0]);
+  }
+}, { capture: true });
+
+// ── COUNTDOWN TIMER ──
+function startCountdown() {
+  const courtDate = new Date('2026-07-24T09:00:00');
+  function tick() {
+    const now = new Date();
+    let diff = courtDate - now;
+    if (diff < 0) diff = 0;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const el = (id) => document.getElementById(id);
+    if (el('cdDays')) el('cdDays').textContent = String(d).padStart(2, '0');
+    if (el('cdHours')) el('cdHours').textContent = String(h).padStart(2, '0');
+    if (el('cdMins')) el('cdMins').textContent = String(m).padStart(2, '0');
+    if (el('cdSecs')) el('cdSecs').textContent = String(s).padStart(2, '0');
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+// ── PLAYBOOK ──
+function togglePlaybookStep(stepEl) {
+  stepEl.classList.toggle('completed');
+  const check = stepEl.querySelector('.pb-check');
+  if (stepEl.classList.contains('completed')) {
+    check.textContent = '✓';
+    showToast('success', `✅ Step completed: <strong>${stepEl.querySelector('.pb-step-title').textContent}</strong>`);
+  } else {
+    const idx = Array.from(stepEl.parentElement.children).indexOf(stepEl) + 1;
+    check.textContent = idx;
+  }
+  updatePlaybookProgress();
+}
+
+function updatePlaybookProgress() {
+  const steps = document.querySelectorAll('.pb-step');
+  const done = document.querySelectorAll('.pb-step.completed').length;
+  if (done === steps.length) {
+    showToast('success', '🎉 All defense playbook steps completed! Your case is fully prepared.', 6000);
+  }
+}
+
+// ── DEFENSE LETTER FUNCTIONS ──
+function copyLetter() {
+  const text = document.querySelector('.letter-body').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('success', '📋 Defense declaration copied to clipboard');
+  }).catch(() => {
+    showToast('warn', '⚠️ Could not copy — try selecting and copying manually');
+  });
+}
+
+function downloadLetter() {
+  const text = document.querySelector('.letter-body').innerText;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'defense-declaration-TR-2026-0847291.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('success', '⬇️ Defense declaration downloaded');
+}
+
+function emailLetter() {
+  const subject = encodeURIComponent('Trial by Written Declaration — Case TR-2026-0847291');
+  const body = encodeURIComponent(document.querySelector('.letter-body').innerText);
+  window.open(`mailto:?subject=${subject}&body=${body}`);
+  showToast('info', '📧 Opening email client with pre-filled declaration');
+}
+
+// ── AUTO-RECOMMEND MOTION ──
+function autoRecommendMotion() {
+  setTimeout(() => {
+    const dismissalOption = document.querySelector('[data-type="declaration"]');
+    if (dismissalOption) {
+      selectMotion(dismissalOption, 'declaration');
+      showToast('info', '✨ AI auto-selected <strong>Trial by Written Declaration</strong> as optimal first strategy');
+    }
+  }, 500);
+}
+
+// ── ENHANCED ANALYSIS (auto-show new sections) ──
+const _origRunAnalysis = runAnalysis;
+runAnalysis = async function() {
+  if (!uploadedFile && !batchFiles.length) return;
+  if (!selectedState) { alert('Please select a jurisdiction first.'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  const progress = document.getElementById('analysisProgress');
+  const results = document.getElementById('resultsContainer');
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  progress.classList.add('visible');
+  results.classList.remove('visible');
+
+  showToast('info', '🔍 AI analysis started — scanning citation for defects...');
+
+  for (let i = 0; i < analysisSteps.length; i++) {
+    const pct = Math.round(((i + 1) / analysisSteps.length) * 100);
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.querySelectorAll('.progress-step').forEach((el, idx) => {
+      el.classList.remove('active', 'done');
+      if (idx < i) el.classList.add('done');
+      if (idx === i) el.classList.add('active');
+    });
+
+    if (i === 2) showToast('warn', '⚠️ Procedural defects detected — 3 issues found');
+    if (i === 4) showToast('warn', '⚠️ Equipment calibration failure — LIDAR out of compliance');
+    if (i === 10) showToast('warn', '🚨 Officer signature anomaly — numeric ID substituted for signature');
+
+    await sleep(350 + Math.random() * 250);
+  }
+
+  document.querySelectorAll('.progress-step').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  await sleep(300);
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  progress.classList.remove('visible');
+  results.classList.add('visible');
+
+  animateScore(84);
+  startCountdown();
+  autoRecommendMotion();
+
+  showToast('success', '✅ Analysis complete — <strong>12 issues found</strong>, <strong>84% dismissal rate</strong>', 6000);
+
+  // Scroll to results
+  setTimeout(() => {
+    document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 400);
+};
+
+// ── FEE MANAGEMENT ──
+const defaultFeeData = {
+  violations: [
+    { cat: 'Infraction', badge: 'infraction', items: [
+      { name: 'General (Any infraction not otherwise specified)', fee: 150 },
+    ]},
+    { cat: 'Misdemeanor', badge: 'misdemeanor', items: [
+      { name: 'Aggressive driving', fee: 2000 },
+      { name: 'Drinking while driving', fee: 2500 },
+      { name: 'Driving commercial vehicle while under the influence (BAC .04–.07)', fee: 5000 },
+      { name: 'Driving while license suspended, revoked, or cancelled', fee: 2000 },
+      { name: 'Driving under the influence of alcohol/drugs (DUI)', fee: 2500 },
+      { name: 'Driving without a valid license', fee: 2000 },
+      { name: 'Driving without insurance', fee: 300 },
+      { name: 'Failure to obey police officer\'s order or instruction', fee: 1000 },
+      { name: 'Failure to yield right-of-way to emergency vehicle', fee: 150 },
+      { name: 'Fleeing or attempting to elude police', fee: 3000 },
+      { name: 'Following too closely', fee: 175 },
+      { name: 'Hit and run involving property damage', fee: 1000 },
+      { name: 'Organize or engage in a speed contest/racing', fee: 1500 },
+      { name: 'Reckless driving', fee: 1200 },
+      { name: 'Speeding 30+ mph over limit', fee: 400 },
+      { name: 'Speeding 31–40 mph over limit', fee: 400 },
+      { name: 'Speeding 41+ mph over limit', fee: 500 },
+      { name: 'Vehicle exceeding maximum weight limits', fee: 500 },
+      { name: 'General (Any misdemeanor not otherwise specified)', fee: null },
+      { name: 'Driving while suspended due to DUI/drug-related offense', fee: null },
+      { name: 'DUI (2nd offense within 7 years)', fee: null },
+      { name: 'General (Any misdemeanor with refund not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Non-Moving', badge: 'nonmoving', items: [
+      { name: 'General (Any non-moving not otherwise specified)', fee: 300 },
+    ]},
+    { cat: 'Gross Misdemeanor', badge: 'gross', items: [
+      { name: 'General (Any gross misdemeanor not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Class A Felony', badge: 'felony', items: [
+      { name: 'General (Any Class A felony not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Class B Felony', badge: 'felony', items: [
+      { name: 'General (Any Class B felony not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Class C Felony', badge: 'felony', items: [
+      { name: 'General (Any Class C felony not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Class D Felony', badge: 'felony', items: [
+      { name: 'General (Any Class D felony not otherwise specified)', fee: null },
+    ]},
+    { cat: 'Class E Felony', badge: 'felony', items: [
+      { name: 'General (Any Class E felony not otherwise specified)', fee: null },
+    ]},
+  ],
+  courts: [
+    { county: 'Clark County', courts: [
+      { name: 'Boulder Township Justice Court', city: 'Boulder City, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Boulder City Municipal Court', city: 'Boulder City, NV', fee: 150, comp: '$121 – $131' },
+      { name: 'Bunkerville Township Justice Court', city: 'Bunkerville, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Goodsprings Township Justice Court', city: 'Jean, NV', fee: 160, comp: '$97 – $105' },
+      { name: 'Henderson Municipal Court', city: 'Henderson, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Henderson Township Justice Court', city: 'Henderson, NV', fee: 160, comp: '' },
+      { name: 'Las Vegas Municipal Court', city: 'Las Vegas, NV', fee: 160, comp: '$97 – $105' },
+      { name: 'Las Vegas Justice Court', city: 'Las Vegas, NV', fee: 160, comp: '$97 – $105' },
+      { name: 'Las Vegas Township Justice Court', city: 'Las Vegas, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Laughlin Township Justice Court', city: 'Laughlin, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Mesquite Municipal Court', city: 'Mesquite, NV', fee: 193, comp: '' },
+      { name: 'Mesquite Township Justice Court', city: 'Mesquite, NV', fee: 150, comp: '' },
+      { name: 'Moapa Township Justice Court', city: 'Moapa, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Moapa Valley Township Justice Court', city: 'Overton, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'North Las Vegas Municipal Court', city: 'North Las Vegas, NV', fee: 160, comp: '$97 – $105' },
+      { name: 'North Las Vegas Justice Court', city: 'North Las Vegas, NV', fee: 150, comp: '$97 – $105' },
+      { name: 'Searchlight Township Justice Court', city: 'Searchlight, NV', fee: 160, comp: '$97 – $105' },
+      { name: 'Moapa Tribal Court', city: 'Moapa, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Carson City', courts: [
+      { name: 'Carson City Justice Court', city: 'Carson City, NV', fee: null, comp: '' },
+      { name: 'Carson City Municipal Court', city: 'Carson City, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Churchill', courts: [
+      { name: 'Fallon Municipal Court', city: 'Fallon, NV', fee: null, comp: '' },
+      { name: 'New River Township Justice Court', city: 'Fallon, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Douglas', courts: [
+      { name: 'East Fork Township Justice Court', city: 'Minden, NV', fee: null, comp: '' },
+      { name: 'Tahoe Township Justice Court', city: 'Stateline, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Elko', courts: [
+      { name: 'Carlin Municipal Court', city: 'Carlin, NV', fee: null, comp: '' },
+      { name: 'Carlin Township Justice Court', city: 'Carlin, NV', fee: null, comp: '' },
+      { name: 'Eastline Justice Court', city: 'West Wendover, NV', fee: null, comp: '' },
+      { name: 'Elko Municipal Court', city: 'Elko, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Lincoln County', courts: [
+      { name: 'Pahranagat Valley Justice Court', city: 'Alamo, NV', fee: null, comp: '' },
+    ]},
+    { county: 'Nye County', courts: [
+      { name: 'Tonopah Township Justice Court', city: 'Tonopah, NV', fee: 210, comp: '' },
+    ]},
+  ]
+};
+
+let feeData = JSON.parse(localStorage.getItem('ts_fee_data')) || JSON.parse(JSON.stringify(defaultFeeData));
+let currentFeeTab = 'violations';
+
+function toggleFeePanel() {
+  document.getElementById('feeOverlay').classList.toggle('open');
+  document.getElementById('feePanel').classList.toggle('open');
+  if (document.getElementById('feePanel').classList.contains('open')) renderFeeTab();
+}
+
+function closeFeePanel() {
+  document.getElementById('feeOverlay').classList.remove('open');
+  document.getElementById('feePanel').classList.remove('open');
+}
+
+function switchFeeTab(tab, el) {
+  currentFeeTab = tab;
+  document.querySelectorAll('.fee-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderFeeTab();
+}
+
+function renderFeeTab(filter = '') {
+  const body = document.getElementById('feePanelBody');
+  if (currentFeeTab === 'violations') renderViolationFees(body, filter);
+  else renderCourtFees(body, filter);
+  updateFeeStats();
+}
+
+function renderViolationFees(container, filter) {
+  let html = '<input class="fee-search" placeholder="Search violations..." oninput="renderFeeTab(this.value)" id="feeSearchInput">';
+
+  // Add new violation row
+  html += `<div class="fee-add-row">
+    <input type="text" placeholder="New violation name..." id="newViolationName">
+    <input type="text" placeholder="Fee" id="newViolationFee" style="width:80px;flex:none;font-family:\'JetBrains Mono\',monospace;text-align:right;">
+    <select id="newViolationCat" style="padding:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:12px;">
+      <option value="Infraction">Infraction</option>
+      <option value="Misdemeanor" selected>Misdemeanor</option>
+      <option value="Non-Moving">Non-Moving</option>
+      <option value="Gross Misdemeanor">Gross Misd.</option>
+    </select>
+    <button class="fee-add-btn" onclick="addViolation()">+ Add</button>
+  </div>`;
+
+  feeData.violations.forEach((cat, ci) => {
+    const filtered = cat.items.filter(item =>
+      !filter || item.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    if (filter && filtered.length === 0) return;
+
+    html += `<div class="fee-category-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      <h4><span class="fee-cat-badge ${cat.badge}">${cat.cat}</span> ${filtered.length} violation${filtered.length !== 1 ? 's' : ''}</h4>
+      <span style="font-size:10px;color:var(--text-muted);">▼</span>
+    </div>`;
+    html += '<div>';
+    filtered.forEach((item, ii) => {
+      const origCat = defaultFeeData.violations[ci];
+      const origItem = origCat ? origCat.items[ii] : null;
+      const isModified = origItem && item.fee !== origItem.fee;
+      const feeVal = item.fee !== null ? '$' + item.fee : '';
+      html += `<div class="fee-row">
+        <span class="fee-name">${item.name}</span>
+        <input class="fee-input ${isModified ? 'modified' : ''}" value="${feeVal}"
+          onchange="updateViolationFee(${ci}, ${ii}, this.value)"
+          placeholder="Set fee">
+        <button class="fee-reset" title="Reset to default" onclick="resetViolationFee(${ci}, ${ii})">↺</button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+  if (filter) document.getElementById('feeSearchInput').value = filter;
+}
+
+function renderCourtFees(container, filter) {
+  let html = '<input class="fee-search" placeholder="Search courts..." oninput="renderFeeTab(this.value)" id="feeSearchInput">';
+  html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:8px 12px;background:var(--surface-2);border-radius:var(--radius-sm);">Showing fees for: <strong>Infraction</strong> · 19 courts covered in Nevada</div>';
+
+  feeData.courts.forEach((group, gi) => {
+    const filtered = group.courts.filter(c =>
+      !filter || c.name.toLowerCase().includes(filter.toLowerCase()) || c.city.toLowerCase().includes(filter.toLowerCase())
+    );
+    if (filter && filtered.length === 0) return;
+
+    html += `<div class="court-group" id="courtGroup${gi}">
+      <div class="court-group-header" onclick="document.getElementById('courtGroup${gi}').classList.toggle('expanded')">
+        <h4>${group.county}</h4>
+        <span><span class="court-count">${filtered.length} court${filtered.length !== 1 ? 's' : ''}</span> <span class="court-chevron">▼</span></span>
+      </div>
+      <div class="court-group-body">`;
+
+    filtered.forEach((court, ci) => {
+      const feeVal = court.fee !== null ? '$' + court.fee : '';
+      html += `<div class="court-row">
+        <div class="court-name-cell"><strong>${court.name}</strong><br><span class="court-city">${court.city}</span></div>
+        <input class="fee-input" value="${feeVal}" onchange="updateCourtFee(${gi}, ${ci}, this.value)" placeholder="Set fee">
+        <span class="comp-range">${court.comp || '—'}</span>
+      </div>`;
+    });
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+  if (filter) document.getElementById('feeSearchInput').value = filter;
+}
+
+function updateViolationFee(catIdx, itemIdx, val) {
+  const num = parseInt(val.replace(/[^0-9]/g, ''));
+  feeData.violations[catIdx].items[itemIdx].fee = isNaN(num) ? null : num;
+  updateFeeStats();
+}
+
+function updateCourtFee(groupIdx, courtIdx, val) {
+  const num = parseInt(val.replace(/[^0-9]/g, ''));
+  feeData.courts[groupIdx].courts[courtIdx].fee = isNaN(num) ? null : num;
+  updateFeeStats();
+}
+
+function resetViolationFee(catIdx, itemIdx) {
+  const orig = defaultFeeData.violations[catIdx];
+  if (orig && orig.items[itemIdx]) {
+    feeData.violations[catIdx].items[itemIdx].fee = orig.items[itemIdx].fee;
+    renderFeeTab();
+    showToast('info', '↺ Fee reset to default');
+  }
+}
+
+function resetAllFees() {
+  if (!confirm('Reset all fees to OTR defaults?')) return;
+  feeData = JSON.parse(JSON.stringify(defaultFeeData));
+  localStorage.setItem('ts_fee_data', JSON.stringify(feeData));
+  renderFeeTab();
+  showToast('success', '↺ All fees reset to defaults');
+}
+
+function saveFees() {
+  localStorage.setItem('ts_fee_data', JSON.stringify(feeData));
+  showToast('success', '✅ Fee schedule saved');
+}
+
+function addViolation() {
+  const name = document.getElementById('newViolationName').value.trim();
+  const feeVal = document.getElementById('newViolationFee').value.replace(/[^0-9]/g, '');
+  const cat = document.getElementById('newViolationCat').value;
+  if (!name) return;
+
+  const fee = feeVal ? parseInt(feeVal) : null;
+  const catGroup = feeData.violations.find(c => c.cat === cat);
+  if (catGroup) {
+    catGroup.items.push({ name, fee });
+    localStorage.setItem('ts_fee_data', JSON.stringify(feeData));
+    renderFeeTab();
+    showToast('success', `✅ Added "${name}" to ${cat}`);
+    document.getElementById('newViolationName').value = '';
+    document.getElementById('newViolationFee').value = '';
+  }
+}
+
+function updateFeeStats() {
+  const stats = document.getElementById('feeStats');
+  let totalV = 0, setV = 0, totalC = 0, setC = 0;
+  feeData.violations.forEach(c => { c.items.forEach(i => { totalV++; if (i.fee !== null) setV++; }); });
+  feeData.courts.forEach(g => { g.courts.forEach(c => { totalC++; if (c.fee !== null) setC++; }); });
+  stats.innerHTML = `<strong>${setV}</strong>/${totalV} violation fees · <strong>${setC}</strong>/${totalC} court fees`;
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {});
+</script>
+
+</body>
+</html>
