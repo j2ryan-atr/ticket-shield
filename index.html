@@ -2664,7 +2664,6 @@ uploadZone.addEventListener('drop', (e) => {
   if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
 });
 uploadZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
 
 function handleFile(file) {
   if (batchMode) {
