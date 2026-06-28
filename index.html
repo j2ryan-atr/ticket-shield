@@ -1880,7 +1880,7 @@ body::before {
   <!-- Auto-detect banner -->
   <div class="auto-detect-banner" id="autoDetectBanner">
     <span class="adb-icon">🎯</span>
-    <span class="adb-text"><strong>Auto-Detected:</strong> <span id="autoDetectText">California (CVC jurisdiction) — based on citation header and court name</span></span>
+    <span class="adb-text"><strong>Auto-Detected:</strong> <span id="autoDetectText">Nevada (NRS jurisdiction) — based on citation header, court name, and agency codes</span></span>
     <button class="adb-dismiss" onclick="this.parentElement.classList.remove('visible')">✕</button>
   </div>
 
@@ -1998,8 +1998,8 @@ body::before {
         </div>
       </div>
       <div class="score-summary">
-        <h2>Excellent Grounds for Dismissal</h2>
-        <p>Our AI identified <strong>3 procedural defects</strong>, <strong>2 equipment issues</strong>, a <strong>critical signature violation</strong>, and <strong>4 additional deficiencies</strong> in your citation. The officer signature field contains a numeric ID instead of a legal signature — a facially defective citation. Based on historical data, similar cases have an <strong>84% dismissal rate</strong> when contested.</p>
+        <h2>Potential Defense Issues Identified</h2>
+        <p>The system detected citation anomalies and evidence questions that may be relevant in a Nevada traffic matter. These are separated as <strong>detected citation facts</strong> and <strong>AI-inferred issues</strong>, not legal conclusions. Attorney review is required before relying on any issue in a court filing.</p>
       </div>
       <div class="score-stats">
         <div class="stat-item danger">
@@ -2011,8 +2011,8 @@ body::before {
           <div class="stat-label">Defenses Available</div>
         </div>
         <div class="stat-item success">
-          <div class="stat-value">84%</div>
-          <div class="stat-label">Est. Dismissal Rate</div>
+          <div class="stat-value">Review</div>
+          <div class="stat-label">Attorney Required</div>
         </div>
       </div>
     </div>
@@ -2030,13 +2030,13 @@ body::before {
           <span class="card-badge found">3 Found</span>
         </div>
         <div class="card-body">
-          <div class="finding-item"><div class="finding-dot critical"></div><div>Court filing date exceeds statutory 30-day window — citation filed on day 34. This is grounds for automatic dismissal under CVC §40513.</div></div>
-          <div class="finding-item"><div class="finding-dot critical"></div><div>Officer badge number field is blank. Required under state procedural code §1234.5 for valid citation issuance.</div></div>
-          <div class="finding-item"><div class="finding-dot warning"></div><div>Violation location description is vague — "near intersection" lacks required specificity for due process notice requirements.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Attorney review required.</strong> Nevada procedural deadlines must be verified against Las Vegas Justice Court rules, the charge type, and the citation file before a filing recommendation is shown.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Detected on citation:</strong> Badge number field appears blank. The legal effect, if any, must be verified under Nevada authority.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div><strong>AI-inferred issue:</strong> The location description may need specificity review for notice and identification, pending attorney validation.</div></div>
           <div class="impact-meter">
             <span class="label">Defense Strength</span>
             <div class="impact-bar"><div class="impact-bar-fill high" style="width: 90%"></div></div>
-            <span class="value" style="color: var(--brand-danger);">Critical</span>
+            <span class="value" style="color: var(--brand-warning);">Review</span>
           </div>
         </div>
       </div>
@@ -2051,12 +2051,12 @@ body::before {
           <span class="card-badge warning">Review</span>
         </div>
         <div class="card-body">
-          <div class="finding-item"><div class="finding-dot warning"></div><div>Cited statute CVC §22350 (basic speed law) requires prosecution to prove speed was unsafe for conditions — not merely over posted limit.</div></div>
-          <div class="finding-item"><div class="finding-dot info"></div><div>Speed survey for this road segment expired 14 months ago. Under CVC §40802(b), this may constitute a speed trap defense.</div></div>
+          <div class="finding-item"><div class="finding-dot success"></div><div><strong>Detected on citation:</strong> Violation code appears as NRS §484B.600. Nevada statute matching must remain limited to verified Nevada sources.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Attorney review required:</strong> Any speed-related statutory defense or local rule argument must be verified for Nevada before being included in a filing.</div></div>
           <div class="impact-meter">
             <span class="label">Defense Strength</span>
             <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 65%"></div></div>
-            <span class="value" style="color: var(--brand-warning);">Strong</span>
+            <span class="value" style="color: var(--brand-warning);">Review</span>
           </div>
         </div>
       </div>
@@ -2151,9 +2151,9 @@ body::before {
           <span class="card-badge info">Data</span>
         </div>
         <div class="card-body">
-          <div class="finding-item"><div class="finding-dot info"></div><div>This court dismisses 34% of speeding citations when contested. Rate increases to 72% when equipment calibration defenses are raised.</div></div>
-          <div class="finding-item"><div class="finding-dot info"></div><div>Assigned Judge Martinez has a 41% dismissal rate — above county average of 28%. Tends to scrutinize calibration records closely.</div></div>
-          <div class="finding-item"><div class="finding-dot success"></div><div>Trial by Written Declaration success rate for this violation type: 45%. Recommended as first strategy before in-person appearance.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div>Verified Nevada court outcome data is not loaded. Specific dismissal percentages are hidden until backed by a named, dated dataset.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Judge- or department-specific tendencies require verified court data before display.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Recommended strategy is limited to attorney-reviewed options available in Las Vegas Justice Court.</div></div>
         </div>
       </div>
 
@@ -2193,8 +2193,8 @@ body::before {
                 <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 8px;">OFFICER SIGNATURE LINE</div>
               </div>
 
-              <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Numeric ID substituted for signature.</strong> The officer signature field contains only a badge/ID number ("4789201") instead of a handwritten or electronic signature. This is not a valid legal signature under most state statutes.</div></div>
-              <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Sworn declaration issue.</strong> A traffic citation is a sworn document. Most states require the officer's actual signature to affirm under penalty of perjury that the facts are true. A numeric identifier does not satisfy this oath requirement.</div></div>
+              <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Detected on citation:</strong> The officer signature field contains only a badge/ID number ("4789201") instead of an obvious handwritten or electronic signature.</div></div>
+              <div class="finding-item"><div class="finding-dot warning"></div><div><strong>AI-inferred issue:</strong> The signature format may support a procedural question, but Nevada authority and local e-citation rules must be verified by an attorney.</div></div>
               <div class="finding-item"><div class="finding-dot warning"></div><div><strong>No electronic signature indicator.</strong> If this were an authorized e-signature, it would typically include a "/s/" prefix, a digital certificate hash, or an e-signature system watermark. None detected.</div></div>
             </div>
 
@@ -2213,19 +2213,19 @@ body::before {
                   <div style="flex: 1; height: 28px; background: var(--surface-4); border-radius: 0 4px 4px 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted);">INK</div>
                 </div>
 
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;">Statutory Requirements</div>
-                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">CVC §40500(a) — Officer "shall" sign the citation in the presence of the defendant</div></div>
-                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">Penal Code §853.9 — Citation must be signed under penalty of perjury by the issuing officer</div></div>
-                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot critical"></div><div style="font-size: 12px;">UCC §1-201(37) / ESIGN Act — A number alone does not constitute intent to sign</div></div>
-                <div class="finding-item" style="padding: 6px 0; border: none;"><div class="finding-dot warning"></div><div style="font-size: 12px;">State v. Hernandez (2019) — Court held numeric ID insufficient as officer signature on citation</div></div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;">Nevada Validation Status</div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot success"></div><div style="font-size: 12px;">Detected court: Las Vegas Justice Court</div></div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot success"></div><div style="font-size: 12px;">Detected statute prefix: NRS</div></div>
+                <div class="finding-item" style="padding: 6px 0;"><div class="finding-dot warning"></div><div style="font-size: 12px;">Signature authority: pending Nevada attorney review</div></div>
+                <div class="finding-item" style="padding: 6px 0; border: none;"><div class="finding-dot warning"></div><div style="font-size: 12px;">Generated filings locked until review is complete</div></div>
               </div>
 
               <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius); padding: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                   <span style="font-size: 16px;">🚨</span>
-                  <span style="font-weight: 700; font-size: 13px; color: var(--brand-danger);">High-Confidence Defense Vector</span>
+                  <span style="font-weight: 700; font-size: 13px; color: var(--brand-danger);">Attorney Review Required</span>
                 </div>
-                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">A citation lacking a valid officer signature is facially defective and may be subject to dismissal on procedural grounds. This defect cannot be cured retroactively — the signature must exist at the time of issuance.</p>
+                <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">This anomaly may support a procedural question, but the app will not classify it as a dismissal ground until Nevada authority and local e-citation rules are verified by counsel.</p>
               </div>
             </div>
           </div>
@@ -2233,7 +2233,7 @@ body::before {
           <div class="impact-meter" style="margin-top: 20px;">
             <span class="label">Defense Strength</span>
             <div class="impact-bar"><div class="impact-bar-fill high" style="width: 95%"></div></div>
-            <span class="value" style="color: var(--brand-danger);">Critical</span>
+            <span class="value" style="color: var(--brand-warning);">Review</span>
           </div>
         </div>
       </div>
@@ -2248,13 +2248,13 @@ body::before {
           <span class="card-badge found">2 Found</span>
         </div>
         <div class="card-body">
-          <div class="finding-item"><div class="finding-dot critical"></div><div><strong>Defendant copy not provided at scene.</strong> Officer failed to deliver a copy of the citation to the driver at the time of issuance. Under CVC §40500(b), failure to provide a copy renders the citation voidable.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>AI-inferred service issue.</strong> Any claim about delivery of the defendant copy must be verified against Nevada law and the citation record before filing.</div></div>
           <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Mailed copy sent to wrong address.</strong> Court copy was mailed to a prior address on file rather than the address listed on the driver's current license, potentially violating proper service requirements.</div></div>
           <div class="finding-item"><div class="finding-dot info"></div><div>No proof of service affidavit filed with the court within the statutory window. This creates a jurisdictional challenge opportunity.</div></div>
           <div class="impact-meter">
             <span class="label">Defense Strength</span>
             <div class="impact-bar"><div class="impact-bar-fill high" style="width: 80%"></div></div>
-            <span class="value" style="color: var(--brand-danger);">Critical</span>
+            <span class="value" style="color: var(--brand-warning);">Review</span>
           </div>
         </div>
       </div>
@@ -2269,13 +2269,13 @@ body::before {
           <span class="card-badge warning">Alert</span>
         </div>
         <div class="card-body">
-          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Speedy trial right triggered.</strong> Arraignment date is 62 days from citation date. If defendant asserts speedy trial rights, prosecution must be ready within 45 days in this jurisdiction — the window has lapsed.</div></div>
-          <div class="finding-item"><div class="finding-dot info"></div><div><strong>Continuance opportunity.</strong> If the citing officer is unavailable on the court date, you may request dismissal rather than a continuance. Officer no-show rate for this precinct: 18%.</div></div>
-          <div class="finding-item"><div class="finding-dot info"></div><div>Court date falls on a holiday-adjacent Friday. Historical data shows 23% higher officer no-show rate on these dates in this court.</div></div>
+          <div class="finding-item"><div class="finding-dot warning"></div><div><strong>Deadline verification required.</strong> Court date and response deadlines must be read from the Las Vegas Justice Court record or citation notice before recommendations are shown.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div><strong>Continuance strategy:</strong> attorney review required before advising whether to request, oppose, or waive a continuance.</div></div>
+          <div class="finding-item"><div class="finding-dot info"></div><div>Officer availability and local appearance patterns are not displayed without verified court data.</div></div>
           <div class="impact-meter">
             <span class="label">Defense Strength</span>
             <div class="impact-bar"><div class="impact-bar-fill medium" style="width: 60%"></div></div>
-            <span class="value" style="color: var(--brand-warning);">Strong</span>
+            <span class="value" style="color: var(--brand-warning);">Review</span>
           </div>
         </div>
       </div>
@@ -2352,9 +2352,9 @@ body::before {
         <div class="ef-row"><span class="ef-row-label">Court coverage fee (Las Vegas Justice Court)</span><span class="ef-row-value" id="efBaseCourt">$160</span></div>
         <div class="ef-row" id="efCdlRow" style="display:none;"><span class="ef-row-label">CDL driver surcharge</span><span class="ef-row-value" style="color:var(--brand-warning);">$950</span></div>
         <div class="ef-row" id="efOutCountyRow" style="display:none;"><span class="ef-row-label">Out-of-county surcharge (non–Clark County)</span><span class="ef-row-value" style="color:var(--brand-warning);">$800</span></div>
-        <div class="ef-row"><span class="ef-row-label">Complexity adjustment (12 defenses identified)</span><span class="ef-row-value" id="efComplexity">+$0</span></div>
-        <div class="ef-row"><span class="ef-row-label">Bail / bond deposit (refundable if dismissed)</span><span class="ef-row-value">$285</span></div>
-        <div class="ef-row total"><span class="ef-row-label">Estimated Total Client Cost</span><span class="ef-row-value" id="efTotal">$845</span></div>
+        <div class="ef-row"><span class="ef-row-label">Complexity adjustment (attorney review pending)</span><span class="ef-row-value" id="efComplexity">+$0</span></div>
+        <div class="ef-row" id="efBondRequiredRow" style="display:none;"><span class="ef-row-label" id="efBondRequiredLabel">Bond required</span><span class="ef-row-value" id="efBondRequired" style="color:var(--brand-warning);">Amount pending</span></div>
+        <div class="ef-row total"><span class="ef-row-label">Estimated Total Client Cost</span><span class="ef-row-value" id="efTotal">$560</span></div>
       </div>
       <div class="ef-note">
         <span>ℹ️</span>
@@ -2366,7 +2366,7 @@ body::before {
     <div class="countdown-bar visible" id="countdownBar">
       <div class="countdown-header">
         <h4>⏱️ Court Date Countdown</h4>
-        <span class="court-info">Superior Court — Traffic Div · Dept 42 · Case TR-2026-0847291</span>
+        <span class="court-info">Las Vegas Justice Court · Case TR-2026-0847291</span>
       </div>
       <div class="countdown-grid">
         <div class="cd-unit"><div class="cd-num" id="cdDays">26</div><div class="cd-label">Days</div></div>
@@ -2375,9 +2375,9 @@ body::before {
         <div class="cd-unit"><div class="cd-num" id="cdSecs">08</div><div class="cd-label">Seconds</div></div>
       </div>
       <div class="countdown-deadlines">
-        <div class="cd-deadline"><div class="cd-dot urgent"></div><strong>Written Declaration:</strong>&nbsp;5 days left</div>
-        <div class="cd-deadline"><div class="cd-dot soon"></div><strong>Discovery Request:</strong>&nbsp;12 days left</div>
-        <div class="cd-deadline"><div class="cd-dot ok"></div><strong>Motion Filing:</strong>&nbsp;19 days left</div>
+        <div class="cd-deadline"><div class="cd-dot urgent"></div><strong>Response / Appearance:</strong>&nbsp;verify with court notice</div>
+        <div class="cd-deadline"><div class="cd-dot soon"></div><strong>Records Request:</strong>&nbsp;attorney review required</div>
+        <div class="cd-deadline"><div class="cd-dot ok"></div><strong>Motion Deadline:</strong>&nbsp;verify Nevada rules</div>
         <div class="cd-deadline"><div class="cd-dot ok"></div><strong>Court Appearance:</strong>&nbsp;Jul 24, 2026</div>
       </div>
     </div>
@@ -2394,10 +2394,10 @@ body::before {
         <div class="risk-cell high-risk">$2,625</div>
         <div class="risk-cell med-risk">$49 – $99</div>
         <div class="risk-cell low-risk">$149 – $299</div>
-        <div class="risk-cell row-label">Dismiss Rate</div>
-        <div class="risk-cell high-risk">0%</div>
-        <div class="risk-cell med-risk">58%</div>
-        <div class="risk-cell low-risk your-case">84%</div>
+        <div class="risk-cell row-label">Outcome Data</div>
+        <div class="risk-cell high-risk">N/A</div>
+        <div class="risk-cell med-risk">Unverified</div>
+        <div class="risk-cell low-risk your-case">Attorney Review</div>
         <div class="risk-cell row-label">Insurance Hit</div>
         <div class="risk-cell high-risk">$2,340 / 3yr</div>
         <div class="risk-cell low-risk">$0 if won</div>
@@ -2421,42 +2421,42 @@ body::before {
     <div class="ai-recommendation visible" id="aiRecommendation">
       <div class="ai-rec-header"><span class="ai-sparkle">✨</span> AI-Recommended Defense Strategy</div>
       <div class="ai-rec-body">
-        Based on <strong>12 identified defects</strong>, jurisdiction-specific case law, and an <strong>84% historical dismissal rate</strong> for similar defenses in this court, TicketShield AI recommends a <strong>two-phase layered defense</strong>:
+        Based on detected citation facts and AI-inferred issues, TicketShield AI recommends an <strong>attorney-reviewed Nevada strategy packet</strong> before any filing is prepared:
         <br><br>
-        <strong>Phase 1:</strong> File a <strong>Trial by Written Declaration</strong> — zero downside, 45% standalone success rate, and preserves your right to a full trial de novo if denied.
+        <strong>Phase 1:</strong> Verify the Las Vegas Justice Court workflow, response deadline, charge classification, and any available Nevada-specific contest or appearance options.
         <br>
-        <strong>Phase 2:</strong> If Phase 1 is denied, file a <strong>Motion to Dismiss</strong> citing the invalid officer signature (numeric ID only), late filing (day 34 of 30), and LIDAR calibration failure. This combination has a <strong>78% success rate at trial</strong> in this court.
+        <strong>Phase 2:</strong> After attorney approval, prepare the proper Nevada motion, records request, or appearance strategy using verified authorities only.
       </div>
       <div class="ai-rec-strategy">
-        <div class="strategy-step"><span class="step-num">1</span> Written Declaration (now)</div>
-        <div class="strategy-step"><span class="step-num">2</span> Discovery Request (day 3)</div>
-        <div class="strategy-step"><span class="step-num">3</span> Motion to Dismiss (day 14)</div>
-        <div class="strategy-step"><span class="step-num">4</span> Trial de novo (if needed)</div>
+        <div class="strategy-step"><span class="step-num">1</span> Verify Nevada venue</div>
+        <div class="strategy-step"><span class="step-num">2</span> Build review packet</div>
+        <div class="strategy-step"><span class="step-num">3</span> Attorney approves options</div>
+        <div class="strategy-step"><span class="step-num">4</span> Generate Nevada filing</div>
       </div>
     </div>
 
     <!-- Defense Playbook -->
     <div class="playbook visible" id="playbook">
-      <h3>📋 Automated Defense Playbook</h3>
-      <p class="subtitle">Step-by-step action plan generated from your citation analysis. Click steps to mark complete.</p>
+      <h3>📋 Nevada Review Playbook</h3>
+      <p class="subtitle">Step-by-step review plan generated from citation facts and AI-inferred issues. Filing actions stay locked until attorney review is complete.</p>
       <div class="playbook-timeline">
         <div class="pb-step" onclick="togglePlaybookStep(this)">
           <div class="pb-check">1</div>
           <div class="pb-step-header">
-            <span class="pb-step-title">Submit FOIA Request for Calibration Records</span>
+            <span class="pb-step-title">Prepare Records Request Packet</span>
             <span class="pb-step-timing now">Do Today</span>
           </div>
-          <div class="pb-step-desc">Request LIDAR unit calibration log (S/N: TS-40921) and officer certification records from CHP Coastal Division via public records request. Template auto-generated below.</div>
-          <span class="pb-auto-tag">⚡ Auto-Generated</span>
+          <div class="pb-step-desc">Collect the LIDAR serial number, calibration question, officer certification question, and detected agency for attorney review before sending any Nevada records request.</div>
+          <span class="pb-auto-tag">⚡ Review Packet</span>
         </div>
         <div class="pb-step" onclick="togglePlaybookStep(this)">
           <div class="pb-check">2</div>
           <div class="pb-step-header">
-            <span class="pb-step-title">File Trial by Written Declaration</span>
-            <span class="pb-step-timing now">Within 5 Days</span>
+            <span class="pb-step-title">Verify Las Vegas Justice Court Workflow</span>
+            <span class="pb-step-timing now">Before Filing</span>
           </div>
-          <div class="pb-step-desc">Submit TR-205 form with attached declaration citing officer signature defect, equipment calibration failure, and speed survey expiration. Bail deposit of $285 required.</div>
-          <span class="pb-auto-tag">⚡ Auto-Drafted</span>
+          <div class="pb-step-desc">Confirm the correct Nevada response, appearance, plea, or written-submission option for this case. Do not use out-of-state forms or labels.</div>
+          <span class="pb-auto-tag">⚡ Locked</span>
         </div>
         <div class="pb-step" onclick="togglePlaybookStep(this)">
           <div class="pb-check">3</div>
@@ -2464,8 +2464,8 @@ body::before {
             <span class="pb-step-title">Submit Discovery Request to Prosecution</span>
             <span class="pb-step-timing soon">By Day 12</span>
           </div>
-          <div class="pb-step-desc">Request dashcam footage, officer shift logs, tuning fork test records, and LIDAR maintenance history. Failure to produce within 15 days supports a motion to exclude evidence.</div>
-          <span class="pb-auto-tag">⚡ Auto-Generated</span>
+          <div class="pb-step-desc">List requested evidence such as video, shift logs, device testing records, and maintenance history. Nevada timing and service rules must be verified before sending.</div>
+          <span class="pb-auto-tag">⚡ Attorney Review</span>
         </div>
         <div class="pb-step" onclick="togglePlaybookStep(this)">
           <div class="pb-check">4</div>
@@ -2481,8 +2481,8 @@ body::before {
             <span class="pb-step-title">Prepare Motion to Dismiss (Backup)</span>
             <span class="pb-step-timing later">By Day 19</span>
           </div>
-          <div class="pb-step-desc">If Written Declaration is denied: file Motion to Dismiss citing CVC §40500(a) signature requirement violation, CVC §40513 late filing, and equipment chain-of-custody break. Request trial de novo.</div>
-          <span class="pb-auto-tag">⚡ Auto-Drafted</span>
+          <div class="pb-step-desc">After attorney approval, prepare the correct Nevada motion or court request using verified statutes, rules, and Las Vegas Justice Court procedures only.</div>
+          <span class="pb-auto-tag">⚡ Locked</span>
         </div>
         <div class="pb-step" onclick="togglePlaybookStep(this)">
           <div class="pb-check">6</div>
@@ -2490,7 +2490,7 @@ body::before {
             <span class="pb-step-title">Court Appearance Preparation</span>
             <span class="pb-step-timing later">Day 25</span>
           </div>
-          <div class="pb-step-desc">Review judge profile (Martinez — 41% dismissal rate), prepare cross-examination questions on calibration compliance, organize evidence binder with tabbed exhibits.</div>
+          <div class="pb-step-desc">Organize citation facts, OCR confidence, detected anomalies, evidence questions, and attorney-approved exhibits for the Nevada appearance or filing strategy.</div>
         </div>
       </div>
     </div>
@@ -2498,11 +2498,11 @@ body::before {
     <!-- Defense Letter Preview -->
     <div class="letter-preview visible" id="letterPreview">
       <div class="letter-preview-header">
-        <h3>📄 Auto-Generated Defense Declaration</h3>
+        <h3>📄 Attorney Review Packet - Draft Only</h3>
         <div class="letter-actions">
           <button class="btn btn-outline" onclick="copyLetter()">📋 Copy</button>
-          <button class="btn btn-outline" onclick="downloadLetter()">⬇️ Download .docx</button>
-          <button class="btn btn-primary" onclick="emailLetter()">📧 Email to Court</button>
+          <button class="btn btn-outline" onclick="downloadLetter()">🔒 Attorney Review Required</button>
+          <button class="btn btn-primary" onclick="emailLetter()">🔒 Locked Pending Review</button>
         </div>
       </div>
       <div class="letter-body">
@@ -2511,29 +2511,29 @@ body::before {
           Date: June 28, 2026<br>
           Defendant: Pro Se
         </div>
-        <div class="letter-re">RE: Trial by Written Declaration — People v. Defendant, CVC §22350</div>
-        <div class="letter-greeting">Honorable Judge Martinez,</div>
+        <div class="letter-re">RE: Attorney Review Packet — Las Vegas Justice Court Citation TR-2026-0847291</div>
+        <div class="letter-greeting">Attorney Review Team,</div>
         <div class="letter-para">
-          I respectfully submit this Trial by Written Declaration pursuant to CVC §40902, contesting Citation No. TR-2026-0847291 issued on May 23, 2026, for an alleged violation of CVC §22350 (Unsafe Speed for Conditions) on Highway 101 NB near Main Street.
+          This draft is not ready for filing. It summarizes detected citation facts and AI-inferred issues for attorney review in a Nevada traffic matter. Nevada authorities, Las Vegas Justice Court procedures, deadlines, and filing format must be verified before export or submission.
         </div>
         <div class="letter-para">
-          <strong>I. The Citation Is Facially Defective Due to Invalid Officer Signature</strong><br>
-          The officer signature field on the citation contains only a numeric identifier ("4789201") rather than an actual signature, whether handwritten or electronic. Under CVC §40500(a), the citing officer "shall" sign the notice to appear. Penal Code §853.9 further requires the citation be signed under penalty of perjury. A numeric badge number does not constitute a signature under the ESIGN Act (15 U.S.C. §7001) or UCC §1-201(37). See also <em>State v. Hernandez</em> (2019), holding that a numeric identifier is insufficient as an officer signature on a traffic citation.
+          <strong>I. Detected Citation Facts</strong><br>
+          Citation number TR-2026-0847291, issue date May 23, 2026, Las Vegas Justice Court, NRS §484B.600, alleged speed 72 MPH in a 45 MPH zone, and officer signature field value "4789201" were detected from the uploaded citation/OCR fields.
         </div>
         <div class="letter-para">
-          <strong>II. The Citation Was Filed Beyond the Statutory Deadline</strong><br>
-          The citation was filed with the court on day 34 following issuance. CVC §40513 requires filing within 30 days. This untimely filing is grounds for dismissal as a matter of law.
+          <strong>II. AI-Inferred Issues for Review</strong><br>
+          Potential issues include numeric-only signature format, blank badge field, LIDAR calibration documentation, device serial number verification, vehicle color mismatch, and evidence preservation questions. These are not legal conclusions.
         </div>
         <div class="letter-para">
-          <strong>III. The Speed Measurement Equipment Was Not Properly Calibrated</strong><br>
-          The LIDAR unit used (LTI TruSpeed S, S/N: TS-40921) was last calibrated 387 days prior to the citation date. The manufacturer requires annual calibration. Additionally, no tuning fork verification test was documented for the citing officer's shift, in violation of department policy. The reliability of the speed reading cannot be established.
+          <strong>III. Nevada Authority Verification Needed</strong><br>
+          Counsel should verify Nevada statutes, local Las Vegas Justice Court rules, deadlines, available plea/contest procedures, evidence request channels, and whether any motion practice is appropriate.
         </div>
         <div class="letter-para">
-          <strong>IV. Speed Trap Defense Under CVC §40802(b)</strong><br>
-          The traffic and engineering survey for this road segment expired 14 months prior to the citation date. Under CVC §40802(b), enforcement of a speed limit based on an expired survey constitutes a speed trap, and evidence obtained thereby is inadmissible per CVC §40803.
+          <strong>IV. Filing Lock</strong><br>
+          This packet must not be filed, emailed to court, or exported as a court-ready document until attorney review is marked approved in the app.
         </div>
         <div class="letter-para">
-          Based on the foregoing defects — any one of which independently warrants dismissal — I respectfully request this citation be dismissed in its entirety.
+          Requested next step: attorney review and approval of any Nevada-specific filing, records request, or appearance strategy.
         </div>
         <div class="letter-closing">Respectfully submitted,</div>
         <div class="letter-sig">[Defendant Signature]<br>Date: _______________</div>
@@ -2543,7 +2543,7 @@ body::before {
     <!-- Attorney Review Panel -->
     <div class="attorney-panel">
       <h3>⚖️ Attorney Review & Motion Preparation</h3>
-      <p class="subtitle">Select a motion type for attorney review. Our AI will draft the motion with jurisdiction-specific case law and procedural arguments.</p>
+      <p class="subtitle">Select an item for attorney review. Filing drafts remain locked until Nevada law, local court rules, and deadlines are verified.</p>
 
       <div class="motion-options">
         <div class="motion-option" onclick="selectMotion(this, 'in-limine')" data-type="in-limine">
@@ -2555,7 +2555,7 @@ body::before {
         <div class="motion-option" onclick="selectMotion(this, 'dismissal')" data-type="dismissal">
           <div class="radio"></div>
           <h4>Motion to Dismiss</h4>
-          <p>Challenge the citation on procedural grounds — late filing beyond statutory deadline and missing required officer identification on the citation face.</p>
+          <p>Review whether any Nevada procedural challenge is available based on verified court records, citation fields, and local rules.</p>
           <span class="motion-tag dismissal">Dismissal</span>
         </div>
         <div class="motion-option" onclick="selectMotion(this, 'suppress')" data-type="suppress">
@@ -2566,21 +2566,21 @@ body::before {
         </div>
         <div class="motion-option" onclick="selectMotion(this, 'declaration')" data-type="declaration">
           <div class="radio"></div>
-          <h4>Trial by Written Declaration</h4>
-          <p>Contest the citation by mail without a court appearance. If denied, you retain the right to a new trial de novo in person — zero downside strategy.</p>
-          <span class="motion-tag dismissal">No Appearance</span>
+          <h4>Nevada Contest / Appearance Review</h4>
+          <p>Verify the correct Las Vegas Justice Court contest, plea, written-submission, or appearance process before preparing any court document.</p>
+          <span class="motion-tag dismissal">Review</span>
         </div>
       </div>
 
       <div class="attorney-actions">
         <button class="btn btn-primary" id="prepareMotionBtn" onclick="prepareMotion()" disabled>
-          📝 Prepare Motion Draft
+          📝 Prepare Review Packet
         </button>
         <button class="btn btn-outline" onclick="openModal()">
           👤 Connect with Attorney
         </button>
         <button class="btn btn-success" onclick="downloadReport()">
-          ⬇️ Export Full Report
+          🔒 Export Requires Review
         </button>
       </div>
     </div>
@@ -2624,8 +2624,8 @@ body::before {
       <div class="success-icon">⚖️</div>
       <h4>Attorney Review Request</h4>
       <p class="modal-desc">A licensed attorney in your jurisdiction will review the AI analysis, verify defense strategies, and prepare court-ready filings.</p>
-      <div class="detail-row"><span class="dr-label">Jurisdiction</span><span class="dr-value" id="modalState">California</span></div>
-      <div class="detail-row"><span class="dr-label">Violation</span><span class="dr-value">CVC §22350 — Speeding</span></div>
+      <div class="detail-row"><span class="dr-label">Jurisdiction</span><span class="dr-value" id="modalState">Nevada</span></div>
+      <div class="detail-row"><span class="dr-label">Violation</span><span class="dr-value">NRS §484B.600 — Speeding</span></div>
       <div class="detail-row"><span class="dr-label">Selected Motion</span><span class="dr-value" id="modalMotion">—</span></div>
       <div class="detail-row"><span class="dr-label">AI Confidence</span><span class="dr-value" style="color: var(--brand-success);">72% dismissal likelihood</span></div>
       <div class="detail-row"><span class="dr-label">Attorney Fee</span><span class="dr-value">$149 flat rate</span></div>
@@ -2674,27 +2674,11 @@ if (sessionStorage.getItem('ts_auth') === '1') {
 
 // ── STATE DATA ──
 const states = [
-  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-  { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-  { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
-  { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
-  { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
-  { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
-  { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
-  { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
-  { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
-  { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
-  { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
-  { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
-  { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
-  { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
-  { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
-  { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
-  { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' }
+  { code: 'NV', name: 'Nevada' }
 ];
 
 let selectedState = null;
-let defaultState = localStorage.getItem('ts_default_state') || null;
+let defaultState = localStorage.getItem('ts_default_state') || 'NV';
 let selectedMotion = null;
 let uploadedFile = null;
 let batchMode = false;
@@ -2795,7 +2779,7 @@ function handleFile(file) {
   if (autoAnalyze) {
     showToast('info', '🔍 Auto-analysis starting in 3 seconds...');
     setTimeout(() => {
-      if (uploadedFile && !selectedState) selectState('CA', 'California');
+      if (uploadedFile && !selectedState) selectState('NV', 'Nevada');
       runAnalysis();
     }, 3000);
   }
@@ -2872,10 +2856,12 @@ function simulateOCR(ext) {
     { label: 'Vehicle Color', value: 'BLU', confidence: 'medium', pct: '79%', flagged: true, note: 'REG MISMATCH' },
     { label: 'Vehicle Make', value: 'TOYOTA', confidence: 'high', pct: '96%' },
     { label: 'Driver License', value: 'D4827••••', confidence: 'high', pct: '97%' },
-    { label: 'License Class', value: 'CLASS A CDL', confidence: 'high', pct: '94%', flagged: true, note: 'CDL SURCHARGE' },
+    { label: 'License Class', value: 'CLASS A', confidence: 'high', pct: '94%' },
+    { label: 'CDL', value: 'N', confidence: 'high', pct: '98%' },
     { label: 'Officer Signature', value: '4789201', confidence: 'low', pct: '—', flagged: true, note: 'NUMERIC ONLY' },
     { label: 'Defendant Sig', value: 'PRESENT', confidence: 'high', pct: '91%' },
     { label: 'Court Name', value: 'LAS VEGAS JUSTICE COURT', confidence: 'high', pct: '95%' },
+    { label: 'Prior Citations 3yr', value: '2', confidence: 'high', pct: 'INTAKE', flagged: true, note: 'BOND REVIEW' },
     { label: 'Bail Amount', value: '$285.00', confidence: 'high', pct: '99%' },
   ];
 
@@ -2938,6 +2924,98 @@ function animateScore(target) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+const NEVADA_UNSUPPORTED_CLAIMS = [
+  /out-of-state court/i,
+  /unsupported written contest procedure/i,
+  /guaranteed dismissal/i,
+  /no-risk strategy/i,
+  /\b\d{2,3}%\s+(dismissal|success|win)/i
+];
+
+let attorneyReviewState = {
+  status: 'not_reviewed',
+  approvedExports: { docx: false, pdf: false, email: false, report: false }
+};
+
+function isNevadaCase() {
+  return selectedState === 'NV' || /LAS VEGAS|NEVADA|\bNRS\b|NHP/.test(getCitationText());
+}
+
+function getCitationText() {
+  const fields = Array.from(document.querySelectorAll('.field-value')).map(f => f.textContent);
+  return fields.join(' ').toUpperCase();
+}
+
+function validateNevadaContent(text) {
+  if (!isNevadaCase()) return { valid: true, violations: [] };
+  const violations = NEVADA_UNSUPPORTED_CLAIMS.filter(pattern => pattern.test(text)).map(pattern => pattern.toString());
+  return { valid: violations.length === 0, violations };
+}
+
+function requireAttorneyReview(action, exportKey) {
+  if (attorneyReviewState.status !== 'approved' || attorneyReviewState.approvedExports[exportKey] !== true) {
+    showToast('warn', `🔒 ${action} is locked until Nevada attorney review is approved.`, 6000);
+    openModal();
+    return false;
+  }
+  return true;
+}
+
+function getOcrFieldValue(ocrFieldEls, fieldNames) {
+  const names = fieldNames.map(name => name.toUpperCase());
+  for (const el of ocrFieldEls) {
+    const label = el.querySelector('.field-label');
+    const value = el.querySelector('.field-value');
+    if (!label || !value) continue;
+    const labelText = label.textContent.trim().toUpperCase();
+    if (names.some(name => labelText.includes(name))) return value.textContent.trim();
+  }
+  return '';
+}
+
+function parseCurrency(value) {
+  const cleaned = String(value || '').replace(/[^0-9.]/g, '');
+  if (!cleaned) return 0;
+  const num = Number.parseFloat(cleaned);
+  return Number.isNaN(num) ? 0 : Math.round(num);
+}
+
+function isAffirmative(value) {
+  return /^(Y|YES|TRUE|1)$/i.test(String(value || '').trim());
+}
+
+function isNegative(value) {
+  return /^(N|NO|FALSE|0)$/i.test(String(value || '').trim());
+}
+
+function getCdlStatus(ocrFieldEls) {
+  const explicitCdlValue = getOcrFieldValue(ocrFieldEls, ['CDL', 'COMMERCIAL DRIVER', 'COMMERCIAL LICENSE']);
+  if (isNegative(explicitCdlValue)) return false;
+  if (isAffirmative(explicitCdlValue)) return true;
+  return false;
+}
+
+function getPriorCitationCountLastThreeYears(ocrFieldEls) {
+  const configured = parseInt(localStorage.getItem('ts_prior_citations_3yr') || '', 10);
+  if (!Number.isNaN(configured)) return configured;
+
+  const historyText = getOcrFieldValue(ocrFieldEls, [
+    'CITATIONS LAST 3 YEARS',
+    'PRIOR CITATIONS',
+    'CITATION HISTORY',
+    'THREE YEAR CITATIONS',
+    '3 YEAR CITATIONS'
+  ]);
+  const match = historyText.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+}
+
+function getLasVegasBondAmount(ocrFieldEls) {
+  const configured = parseCurrency(localStorage.getItem('ts_las_vegas_bond_amount'));
+  if (configured > 0) return configured;
+  return parseCurrency(getOcrFieldValue(ocrFieldEls, ['BOND AMOUNT']));
+}
+
 // ── MOTIONS ──
 function selectMotion(el, type) {
   document.querySelectorAll('.motion-option').forEach(o => o.classList.remove('selected'));
@@ -2945,7 +3023,7 @@ function selectMotion(el, type) {
   selectedMotion = type;
   document.getElementById('prepareMotionBtn').disabled = false;
 
-  const labels = { 'in-limine': 'Motion in Limine', 'dismissal': 'Motion to Dismiss', 'suppress': 'Motion to Suppress', 'declaration': 'Trial by Written Declaration' };
+  const labels = { 'in-limine': 'Motion in Limine', 'dismissal': 'Motion to Dismiss', 'suppress': 'Motion to Suppress', 'declaration': 'Nevada Contest / Appearance Review' };
   document.getElementById('modalMotion').textContent = labels[type] || type;
 }
 
@@ -2956,9 +3034,9 @@ function prepareMotion() {
   btn.disabled = true;
 
   setTimeout(() => {
-    btn.innerHTML = '✅ Motion Draft Ready';
+    btn.innerHTML = '✅ Review Packet Ready';
     btn.disabled = false;
-    setTimeout(() => { btn.innerHTML = '📝 Prepare Motion Draft'; }, 3000);
+    setTimeout(() => { btn.innerHTML = '📝 Prepare Review Packet'; }, 3000);
   }, 2500);
 }
 
@@ -2968,6 +3046,7 @@ function closeModal() { document.getElementById('attorneyModal').classList.remov
 
 function submitAttorneyRequest() {
   closeModal();
+  attorneyReviewState.status = 'in_review';
   const banner = document.createElement('div');
   banner.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--brand-success);color:white;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,0.3);';
   banner.textContent = '✓ Attorney review request submitted. You\'ll hear back within 24–48 hours.';
@@ -2976,7 +3055,8 @@ function submitAttorneyRequest() {
 }
 
 function downloadReport() {
-  showToast('success', '⬇️ Full analysis report downloading...');
+  if (!requireAttorneyReview('Full report export', 'report')) return;
+  showToast('success', '⬇️ Attorney-approved report downloading...');
 }
 
 // ── TOAST NOTIFICATIONS ──
@@ -2993,45 +3073,9 @@ function showToast(type, message, duration = 4000) {
 function autoDetectJurisdiction(file) {
   const stateMap = {
     'NV': { name: 'Nevada', hint: 'NRS jurisdiction — based on citation header, court name, and agency codes' },
-    'CA': { name: 'California', hint: 'CVC jurisdiction — based on citation header and court name' },
-    'FL': { name: 'Florida', hint: 'FSS jurisdiction — based on Florida Statute references' },
-    'TX': { name: 'Texas', hint: 'TC jurisdiction — based on Texas Transportation Code references' },
-    'NY': { name: 'New York', hint: 'VTL jurisdiction — based on Vehicle & Traffic Law references' },
-    'IL': { name: 'Illinois', hint: 'ILCS jurisdiction — based on Illinois Compiled Statutes' },
-    'AZ': { name: 'Arizona', hint: 'ARS jurisdiction — based on Arizona Revised Statutes references' },
   };
 
-  // Detect from OCR extracted fields — scan court name, agency, statute references
-  const ocrFields = document.querySelectorAll('.field-value');
-  const ocrText = Array.from(ocrFields).map(f => f.textContent).join(' ').toUpperCase();
-
-  let detected = null;
-
-  // Check OCR text for state-specific markers
-  if (/\bNRS\b|NEVADA|LAS VEGAS|CLARK COUNTY|HENDERSON|RENO|NV\b|NHP\b/.test(ocrText)) detected = 'NV';
-  else if (/\bCVC\b|CALIFORNIA|CHP\b|LOS ANGELES|SAN FRANCISCO/.test(ocrText)) detected = 'CA';
-  else if (/\bFSS\b|FLORIDA|FHP\b|MIAMI|ORLANDO|JACKSONVILLE/.test(ocrText)) detected = 'FL';
-  else if (/\bTC\b.*TEXAS|TEXAS|THP\b|HOUSTON|DALLAS|SAN ANTONIO/.test(ocrText)) detected = 'TX';
-  else if (/\bVTL\b|NEW YORK|NYPD|NYSP/.test(ocrText)) detected = 'NY';
-  else if (/\bILCS\b|ILLINOIS|ISP\b|CHICAGO/.test(ocrText)) detected = 'IL';
-  else if (/\bARS\b|ARIZONA|DPS\b|PHOENIX|TUCSON/.test(ocrText)) detected = 'AZ';
-
-  // Check filename for state hints
-  const fname = file.name.toUpperCase();
-  if (!detected) {
-    for (const [code, info] of Object.entries(stateMap)) {
-      if (fname.includes(code) || fname.includes(info.name.toUpperCase())) { detected = code; break; }
-    }
-  }
-
-  // Fallback: check what state the fee schedule is configured for
-  if (!detected && feeData.courts.length > 0) {
-    const courtText = feeData.courts.map(g => g.county + ' ' + g.courts.map(c => c.city).join(' ')).join(' ').toUpperCase();
-    if (courtText.includes('NV') || courtText.includes('NEVADA')) detected = 'NV';
-  }
-
-  // Final fallback
-  if (!detected) detected = 'NV';
+  const detected = 'NV';
 
   const info = stateMap[detected];
   if (info && (!selectedState || selectedState !== detected)) {
@@ -3149,7 +3193,13 @@ function copyLetter() {
 }
 
 function downloadLetter() {
+  if (!requireAttorneyReview('Document export', 'docx')) return;
   const text = document.querySelector('.letter-body').innerText;
+  const validation = validateNevadaContent(text);
+  if (!validation.valid) {
+    showToast('warn', '🔒 Export blocked: out-of-jurisdiction legal content detected.', 6000);
+    return;
+  }
   const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3161,7 +3211,14 @@ function downloadLetter() {
 }
 
 function emailLetter() {
-  const subject = encodeURIComponent('Trial by Written Declaration — Case TR-2026-0847291');
+  if (!requireAttorneyReview('Court email', 'email')) return;
+  const text = document.querySelector('.letter-body').innerText;
+  const validation = validateNevadaContent(text);
+  if (!validation.valid) {
+    showToast('warn', '🔒 Email blocked: out-of-jurisdiction legal content detected.', 6000);
+    return;
+  }
+  const subject = encodeURIComponent('Attorney-Approved Nevada Review Packet — Case TR-2026-0847291');
   const body = encodeURIComponent(document.querySelector('.letter-body').innerText);
   window.open(`mailto:?subject=${subject}&body=${body}`);
   showToast('info', '📧 Opening email client with pre-filled declaration');
@@ -3173,7 +3230,7 @@ function autoRecommendMotion() {
     const dismissalOption = document.querySelector('[data-type="declaration"]');
     if (dismissalOption) {
       selectMotion(dismissalOption, 'declaration');
-      showToast('info', '✨ AI auto-selected <strong>Trial by Written Declaration</strong> as optimal first strategy');
+      showToast('info', '✨ AI prepared a <strong>Nevada attorney review packet</strong> as the next step');
     }
   }, 500);
 }
@@ -3251,18 +3308,7 @@ function calculateEstimatedFee() {
 
   if (!courtFee) { courtFee = matchedFee; courtMatch = 'Default (no court-specific fee)'; }
 
-  // Detect CDL driver from OCR fields
-  let isCDL = false;
-  ocrFieldEls.forEach(el => {
-    const label = el.querySelector('.field-label');
-    const value = el.querySelector('.field-value');
-    if (label && value) {
-      const lt = label.textContent.trim().toUpperCase();
-      const vt = value.textContent.trim().toUpperCase();
-      if (vt.includes('CDL') || vt.includes('COMMERCIAL')) isCDL = true;
-      if (lt.includes('LICENSE') && (vt.includes('CLASS A') || vt.includes('CLASS B'))) isCDL = true;
-    }
-  });
+  const isCDL = getCdlStatus(ocrFieldEls);
 
   // Detect if violation is outside Clark County
   let isOutsideClark = true;
@@ -3299,10 +3345,13 @@ function calculateEstimatedFee() {
 
   const cdlSurcharge = isCDL ? 950 : 0;
   const outCountySurcharge = isOutsideClark ? 800 : 0;
+  const priorCitationCount3yr = getPriorCitationCountLastThreeYears(ocrFieldEls);
+  const isLasVegasJusticeCourt = courtMatch.toUpperCase().includes('LAS VEGAS JUSTICE COURT');
+  const bondAmount = getLasVegasBondAmount(ocrFieldEls);
+  const bondRequired = isLasVegasJusticeCourt && priorCitationCount3yr > 1;
 
   // Populate the card
-  const bail = 285;
-  const total = matchedFee + courtFee + cdlSurcharge + outCountySurcharge + bail;
+  const total = matchedFee + courtFee + cdlSurcharge + outCountySurcharge + (bondRequired ? bondAmount : 0);
 
   document.getElementById('efAttorneyFee').textContent = '$' + matchedFee.toLocaleString();
   document.getElementById('efViolationType').textContent = matchedName;
@@ -3321,11 +3370,16 @@ function calculateEstimatedFee() {
   // Show/hide surcharge rows
   document.getElementById('efCdlRow').style.display = isCDL ? 'flex' : 'none';
   document.getElementById('efOutCountyRow').style.display = isOutsideClark ? 'flex' : 'none';
+  document.getElementById('efBondRequiredRow').style.display = bondRequired ? 'flex' : 'none';
+  document.getElementById('efBondRequired').textContent = bondAmount > 0 ? '$' + bondAmount.toLocaleString() : 'Amount pending';
+  document.getElementById('efBondRequiredLabel').textContent = `Bond required (${courtMatch}, ${priorCitationCount3yr} citations in 3 years)`;
 
   card.classList.add('visible');
   showToast('info', `💲 Estimated attorney fee: <strong>$${total.toLocaleString()}</strong> (${matchedName})`);
   if (isCDL) showToast('warn', '🚛 CDL driver detected — <strong>$950 surcharge</strong> applied');
   if (isOutsideClark) showToast('warn', '📍 Non–Clark County violation — <strong>$800 surcharge</strong> applied');
+  if (bondRequired && bondAmount > 0) showToast('warn', `🏛️ Bond required — <strong>$${bondAmount.toLocaleString()}</strong> added for Las Vegas Justice Court citation history`);
+  if (bondRequired && bondAmount === 0) showToast('warn', '🏛️ Bond required — amount pending attorney/court confirmation');
 }
 
 // ── ENHANCED ANALYSIS (auto-show new sections) ──
@@ -3356,8 +3410,8 @@ runAnalysis = async function() {
       if (idx === i) el.classList.add('active');
     });
 
-    if (i === 2) showToast('warn', '⚠️ Procedural defects detected — 3 issues found');
-    if (i === 4) showToast('warn', '⚠️ Equipment calibration failure — LIDAR out of compliance');
+    if (i === 2) showToast('warn', '⚠️ Nevada procedural review required — deadline claims locked');
+    if (i === 4) showToast('warn', '⚠️ Equipment documentation question detected — attorney review required');
     if (i === 10) showToast('warn', '🚨 Officer signature anomaly — numeric ID substituted for signature');
 
     await sleep(350 + Math.random() * 250);
@@ -3371,13 +3425,13 @@ runAnalysis = async function() {
   progress.classList.remove('visible');
   results.classList.add('visible');
 
-  animateScore(84);
+  animateScore(64);
   startCountdown();
   // Delay fee calculation to ensure all OCR fields are rendered
   setTimeout(() => calculateEstimatedFee(), 1500);
   autoRecommendMotion();
 
-  showToast('success', '✅ Analysis complete — <strong>12 issues found</strong>, <strong>84% dismissal rate</strong>', 6000);
+  showToast('success', '✅ Analysis complete — <strong>review packet ready</strong>, filings locked pending attorney review', 6000);
 
   // Scroll to results
   setTimeout(() => {
