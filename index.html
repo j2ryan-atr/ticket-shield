@@ -1757,6 +1757,76 @@ body::before {
 @media (max-width: 640px) {
   .fee-panel { width: 100%; right: -100%; }
 }
+
+/* ── ESTIMATED FEE CARD ── */
+.estimated-fee-card {
+  display: none;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(37, 99, 235, 0.08));
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.estimated-fee-card.visible { display: block; }
+.ef-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.ef-header h3 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.ef-header .ef-source { font-size: 11px; color: var(--text-muted); padding: 3px 10px; background: var(--surface-3); border-radius: 4px; }
+.ef-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ef-item {
+  padding: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.ef-item .ef-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.ef-item .ef-value { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.ef-item .ef-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+.ef-item.primary { border-color: var(--brand-accent); }
+.ef-item.primary .ef-value { color: var(--brand-accent); }
+.ef-breakdown {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.ef-breakdown-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.ef-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  font-size: 13px;
+}
+.ef-row:last-child { border-bottom: none; }
+.ef-row .ef-row-label { color: var(--text-secondary); }
+.ef-row .ef-row-value { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.ef-row.total { border-top: 2px solid var(--border); padding-top: 10px; margin-top: 4px; }
+.ef-row.total .ef-row-label { font-weight: 700; color: var(--text-primary); }
+.ef-row.total .ef-row-value { color: var(--brand-accent); font-size: 15px; }
+.ef-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .ef-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -2250,6 +2320,43 @@ body::before {
             <span class="value" style="color: var(--brand-danger);">High</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Estimated Attorney Fee -->
+    <div class="estimated-fee-card" id="estimatedFeeCard">
+      <div class="ef-header">
+        <h3>💲 Estimated Attorney Fee</h3>
+        <span class="ef-source">Based on OTR Fee Schedule</span>
+      </div>
+      <div class="ef-grid">
+        <div class="ef-item primary">
+          <div class="ef-label">Attorney Fee</div>
+          <div class="ef-value" id="efAttorneyFee">$400</div>
+          <div class="ef-sub" id="efViolationType">Speeding 30+ mph over limit</div>
+        </div>
+        <div class="ef-item">
+          <div class="ef-label">Court-Specific Fee</div>
+          <div class="ef-value" id="efCourtFee">$160</div>
+          <div class="ef-sub" id="efCourtName">Las Vegas Justice Court</div>
+        </div>
+        <div class="ef-item">
+          <div class="ef-label">Competitive Range</div>
+          <div class="ef-value" id="efCompRange" style="font-size:20px;">$97–$105</div>
+          <div class="ef-sub">Market average for this court</div>
+        </div>
+      </div>
+      <div class="ef-breakdown">
+        <div class="ef-breakdown-title">Fee Breakdown</div>
+        <div class="ef-row"><span class="ef-row-label">Base violation fee (Misdemeanor — Speeding 30+ mph)</span><span class="ef-row-value" id="efBaseViol">$400</span></div>
+        <div class="ef-row"><span class="ef-row-label">Court coverage fee (Las Vegas Justice Court)</span><span class="ef-row-value" id="efBaseCourt">$160</span></div>
+        <div class="ef-row"><span class="ef-row-label">Complexity adjustment (12 defenses identified)</span><span class="ef-row-value" id="efComplexity">+$0</span></div>
+        <div class="ef-row"><span class="ef-row-label">Bail / bond deposit (refundable if dismissed)</span><span class="ef-row-value">$285</span></div>
+        <div class="ef-row total"><span class="ef-row-label">Estimated Total Client Cost</span><span class="ef-row-value" id="efTotal">$845</span></div>
+      </div>
+      <div class="ef-note">
+        <span>ℹ️</span>
+        <span>Fees are based on your configured OTR fee schedule for Nevada. The attorney fee reflects the default violation fee for this offense type. Court-specific fees may override the default. You can adjust fees in the <strong style="cursor:pointer;color:var(--brand-accent);" onclick="toggleFeePanel()">Fee Manager</strong>.</span>
       </div>
     </div>
 
@@ -2749,14 +2856,14 @@ function simulateOCR(ext) {
     { label: 'Citation Number', value: 'TR-2026-0847291', confidence: 'high', pct: '99%' },
     { label: 'Issue Date', value: '05/23/2026', confidence: 'high', pct: '98%' },
     { label: 'Court Date', value: '07/24/2026', confidence: 'high', pct: '97%' },
-    { label: 'Violation Code', value: 'CVC §22350', confidence: 'high', pct: '99%' },
-    { label: 'Violation Desc', value: 'UNSAFE SPEED FOR CONDITIONS', confidence: 'high', pct: '96%' },
+    { label: 'Violation Code', value: 'NRS §484B.600', confidence: 'high', pct: '99%' },
+    { label: 'Violation Desc', value: 'SPEEDING 30+ MPH OVER LIMIT', confidence: 'high', pct: '96%' },
     { label: 'Posted Speed', value: '45 MPH', confidence: 'high', pct: '98%' },
     { label: 'Alleged Speed', value: '72 MPH', confidence: 'high', pct: '95%' },
     { label: 'Location', value: 'HWY 101 NB NEAR MAIN ST', confidence: 'medium', pct: '82%' },
     { label: 'Officer Name', value: 'SGT. R. DOMINGUEZ', confidence: 'high', pct: '94%' },
     { label: 'Badge Number', value: '—', confidence: 'low', pct: 'N/A', flagged: true, note: 'MISSING' },
-    { label: 'Agency', value: 'CHP — COASTAL DIV', confidence: 'high', pct: '97%' },
+    { label: 'Agency', value: 'NHP — SOUTHERN COMMAND', confidence: 'high', pct: '97%' },
     { label: 'Equipment', value: 'LIDAR — LTI TRUSPEED S', confidence: 'high', pct: '93%' },
     { label: 'Serial Number', value: 'TS-40921', confidence: 'medium', pct: '88%' },
     { label: 'Vehicle Plate', value: '8ABC123', confidence: 'high', pct: '99%' },
@@ -2765,7 +2872,7 @@ function simulateOCR(ext) {
     { label: 'Driver License', value: 'D4827••••', confidence: 'high', pct: '97%' },
     { label: 'Officer Signature', value: '4789201', confidence: 'low', pct: '—', flagged: true, note: 'NUMERIC ONLY' },
     { label: 'Defendant Sig', value: 'PRESENT', confidence: 'high', pct: '91%' },
-    { label: 'Court Name', value: 'SUPERIOR CT — TRAFFIC DIV', confidence: 'high', pct: '95%' },
+    { label: 'Court Name', value: 'LAS VEGAS JUSTICE COURT', confidence: 'high', pct: '95%' },
     { label: 'Bail Amount', value: '$285.00', confidence: 'high', pct: '99%' },
   ];
 
@@ -2882,16 +2989,49 @@ function showToast(type, message, duration = 4000) {
 // ── AUTO-DETECT JURISDICTION ──
 function autoDetectJurisdiction(file) {
   const stateMap = {
+    'NV': { name: 'Nevada', hint: 'NRS jurisdiction — based on citation header, court name, and agency codes' },
     'CA': { name: 'California', hint: 'CVC jurisdiction — based on citation header and court name' },
     'FL': { name: 'Florida', hint: 'FSS jurisdiction — based on Florida Statute references' },
     'TX': { name: 'Texas', hint: 'TC jurisdiction — based on Texas Transportation Code references' },
     'NY': { name: 'New York', hint: 'VTL jurisdiction — based on Vehicle & Traffic Law references' },
     'IL': { name: 'Illinois', hint: 'ILCS jurisdiction — based on Illinois Compiled Statutes' },
+    'AZ': { name: 'Arizona', hint: 'ARS jurisdiction — based on Arizona Revised Statutes references' },
   };
-  // Simulate detection based on OCR
-  const detected = 'CA';
+
+  // Detect from OCR extracted fields — scan court name, agency, statute references
+  const ocrFields = document.querySelectorAll('.field-value');
+  const ocrText = Array.from(ocrFields).map(f => f.textContent).join(' ').toUpperCase();
+
+  let detected = null;
+
+  // Check OCR text for state-specific markers
+  if (/\bNRS\b|NEVADA|LAS VEGAS|CLARK COUNTY|HENDERSON|RENO|NV\b|NHP\b/.test(ocrText)) detected = 'NV';
+  else if (/\bCVC\b|CALIFORNIA|CHP\b|LOS ANGELES|SAN FRANCISCO/.test(ocrText)) detected = 'CA';
+  else if (/\bFSS\b|FLORIDA|FHP\b|MIAMI|ORLANDO|JACKSONVILLE/.test(ocrText)) detected = 'FL';
+  else if (/\bTC\b.*TEXAS|TEXAS|THP\b|HOUSTON|DALLAS|SAN ANTONIO/.test(ocrText)) detected = 'TX';
+  else if (/\bVTL\b|NEW YORK|NYPD|NYSP/.test(ocrText)) detected = 'NY';
+  else if (/\bILCS\b|ILLINOIS|ISP\b|CHICAGO/.test(ocrText)) detected = 'IL';
+  else if (/\bARS\b|ARIZONA|DPS\b|PHOENIX|TUCSON/.test(ocrText)) detected = 'AZ';
+
+  // Check filename for state hints
+  const fname = file.name.toUpperCase();
+  if (!detected) {
+    for (const [code, info] of Object.entries(stateMap)) {
+      if (fname.includes(code) || fname.includes(info.name.toUpperCase())) { detected = code; break; }
+    }
+  }
+
+  // Fallback: check what state the fee schedule is configured for
+  if (!detected && feeData.courts.length > 0) {
+    const courtText = feeData.courts.map(g => g.county + ' ' + g.courts.map(c => c.city).join(' ')).join(' ').toUpperCase();
+    if (courtText.includes('NV') || courtText.includes('NEVADA')) detected = 'NV';
+  }
+
+  // Final fallback
+  if (!detected) detected = 'NV';
+
   const info = stateMap[detected];
-  if (!selectedState || selectedState !== detected) {
+  if (info && (!selectedState || selectedState !== detected)) {
     selectState(detected, info.name);
     document.getElementById('autoDetectText').textContent = `${info.name} (${info.hint})`;
     document.getElementById('autoDetectBanner').classList.add('visible');
@@ -3035,6 +3175,101 @@ function autoRecommendMotion() {
   }, 500);
 }
 
+// ── ESTIMATED FEE CALCULATION ──
+function calculateEstimatedFee() {
+  const card = document.getElementById('estimatedFeeCard');
+
+  // Get violation description from OCR
+  const ocrFieldEls = document.querySelectorAll('.ocr-field');
+  let violationDesc = '';
+  let courtName = '';
+  ocrFieldEls.forEach(el => {
+    const label = el.querySelector('.field-label');
+    const value = el.querySelector('.field-value');
+    if (label && value) {
+      const lt = label.textContent.trim().toUpperCase();
+      if (lt === 'VIOLATION DESC') violationDesc = value.textContent.trim().toUpperCase();
+      if (lt === 'COURT NAME') courtName = value.textContent.trim().toUpperCase();
+    }
+  });
+
+  // Match violation to fee schedule
+  let matchedFee = null;
+  let matchedName = '';
+  let matchedCat = '';
+  for (const cat of feeData.violations) {
+    for (const item of cat.items) {
+      const itemName = item.name.toUpperCase();
+      // Check for keyword matches
+      if (violationDesc.includes('SPEED') && itemName.includes('SPEED') && item.fee !== null) {
+        // Try to match specificity (30+, 31-40, 41+)
+        if (violationDesc.includes('30+') && itemName.includes('30+')) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+        if (violationDesc.includes('31') && itemName.includes('31')) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+        if (violationDesc.includes('41') && itemName.includes('41')) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+        if (!matchedFee) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; }
+      }
+      if (violationDesc.includes('DUI') && itemName.includes('DUI') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('RECKLESS') && itemName.includes('RECKLESS') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('INSURANCE') && itemName.includes('INSURANCE') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('LICENSE') && itemName.includes('LICENSE') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('HIT AND RUN') && itemName.includes('HIT AND RUN') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('FOLLOWING') && itemName.includes('FOLLOWING') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('RACING') && itemName.includes('RACING') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('ELUDE') && itemName.includes('ELUDE') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+      if (violationDesc.includes('AGGRESSIVE') && itemName.includes('AGGRESSIVE') && item.fee !== null) { matchedFee = item.fee; matchedName = item.name; matchedCat = cat.cat; break; }
+    }
+    if (matchedFee) break;
+  }
+
+  // Fallback to general infraction if no match
+  if (!matchedFee) {
+    matchedFee = 150;
+    matchedName = 'General (Any infraction not otherwise specified)';
+    matchedCat = 'Infraction';
+  }
+
+  // Match court to fee schedule
+  let courtFee = null;
+  let courtMatch = '';
+  let compRange = '—';
+  for (const group of feeData.courts) {
+    for (const court of group.courts) {
+      if (courtName.includes(court.name.toUpperCase()) || court.name.toUpperCase().includes(courtName.replace(/[^A-Z ]/g, '').trim())) {
+        if (court.fee !== null) { courtFee = court.fee; courtMatch = court.name; compRange = court.comp || '—'; break; }
+      }
+      // Partial match on key words
+      const courtWords = courtName.split(/\s+/);
+      const nameWords = court.name.toUpperCase().split(/\s+/);
+      const overlap = courtWords.filter(w => nameWords.includes(w) && w.length > 3).length;
+      if (overlap >= 2 && court.fee !== null) { courtFee = court.fee; courtMatch = court.name; compRange = court.comp || '—'; }
+    }
+    if (courtFee) break;
+  }
+
+  if (!courtFee) { courtFee = matchedFee; courtMatch = 'Default (no court-specific fee)'; }
+
+  // Populate the card
+  const bail = 285;
+  const total = matchedFee + courtFee + bail;
+
+  document.getElementById('efAttorneyFee').textContent = '$' + matchedFee.toLocaleString();
+  document.getElementById('efViolationType').textContent = matchedName;
+  document.getElementById('efCourtFee').textContent = '$' + courtFee.toLocaleString();
+  document.getElementById('efCourtName').textContent = courtMatch;
+  document.getElementById('efCompRange').textContent = compRange;
+  document.getElementById('efBaseViol').textContent = '$' + matchedFee.toLocaleString();
+  document.getElementById('efBaseCourt').textContent = '$' + courtFee.toLocaleString();
+  document.getElementById('efTotal').textContent = '$' + total.toLocaleString();
+
+  // Update the breakdown label
+  const breakdownRows = document.querySelectorAll('.ef-row .ef-row-label');
+  if (breakdownRows[0]) breakdownRows[0].textContent = `Base violation fee (${matchedCat} — ${matchedName})`;
+  if (breakdownRows[1]) breakdownRows[1].textContent = `Court coverage fee (${courtMatch})`;
+
+  card.classList.add('visible');
+  showToast('info', `💲 Estimated attorney fee: <strong>$${matchedFee}</strong> (${matchedName})`);
+}
+
 // ── ENHANCED ANALYSIS (auto-show new sections) ──
 const _origRunAnalysis = runAnalysis;
 runAnalysis = async function() {
@@ -3080,6 +3315,7 @@ runAnalysis = async function() {
 
   animateScore(84);
   startCountdown();
+  calculateEstimatedFee();
   autoRecommendMotion();
 
   showToast('success', '✅ Analysis complete — <strong>12 issues found</strong>, <strong>84% dismissal rate</strong>', 6000);
