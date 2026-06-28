@@ -2350,6 +2350,8 @@ body::before {
         <div class="ef-breakdown-title">Fee Breakdown</div>
         <div class="ef-row"><span class="ef-row-label">Base violation fee (Misdemeanor — Speeding 30+ mph)</span><span class="ef-row-value" id="efBaseViol">$400</span></div>
         <div class="ef-row"><span class="ef-row-label">Court coverage fee (Las Vegas Justice Court)</span><span class="ef-row-value" id="efBaseCourt">$160</span></div>
+        <div class="ef-row" id="efCdlRow" style="display:none;"><span class="ef-row-label">CDL driver surcharge</span><span class="ef-row-value" style="color:var(--brand-warning);">$950</span></div>
+        <div class="ef-row" id="efOutCountyRow" style="display:none;"><span class="ef-row-label">Out-of-county surcharge (non–Clark County)</span><span class="ef-row-value" style="color:var(--brand-warning);">$800</span></div>
         <div class="ef-row"><span class="ef-row-label">Complexity adjustment (12 defenses identified)</span><span class="ef-row-value" id="efComplexity">+$0</span></div>
         <div class="ef-row"><span class="ef-row-label">Bail / bond deposit (refundable if dismissed)</span><span class="ef-row-value">$285</span></div>
         <div class="ef-row total"><span class="ef-row-label">Estimated Total Client Cost</span><span class="ef-row-value" id="efTotal">$845</span></div>
@@ -2870,6 +2872,7 @@ function simulateOCR(ext) {
     { label: 'Vehicle Color', value: 'BLU', confidence: 'medium', pct: '79%', flagged: true, note: 'REG MISMATCH' },
     { label: 'Vehicle Make', value: 'TOYOTA', confidence: 'high', pct: '96%' },
     { label: 'Driver License', value: 'D4827••••', confidence: 'high', pct: '97%' },
+    { label: 'License Class', value: 'CLASS A CDL', confidence: 'high', pct: '94%', flagged: true, note: 'CDL SURCHARGE' },
     { label: 'Officer Signature', value: '4789201', confidence: 'low', pct: '—', flagged: true, note: 'NUMERIC ONLY' },
     { label: 'Defendant Sig', value: 'PRESENT', confidence: 'high', pct: '91%' },
     { label: 'Court Name', value: 'LAS VEGAS JUSTICE COURT', confidence: 'high', pct: '95%' },
@@ -3248,9 +3251,58 @@ function calculateEstimatedFee() {
 
   if (!courtFee) { courtFee = matchedFee; courtMatch = 'Default (no court-specific fee)'; }
 
+  // Detect CDL driver from OCR fields
+  let isCDL = false;
+  ocrFieldEls.forEach(el => {
+    const label = el.querySelector('.field-label');
+    const value = el.querySelector('.field-value');
+    if (label && value) {
+      const lt = label.textContent.trim().toUpperCase();
+      const vt = value.textContent.trim().toUpperCase();
+      if (vt.includes('CDL') || vt.includes('COMMERCIAL')) isCDL = true;
+      if (lt.includes('LICENSE') && (vt.includes('CLASS A') || vt.includes('CLASS B'))) isCDL = true;
+    }
+  });
+
+  // Detect if violation is outside Clark County
+  let isOutsideClark = true;
+  const courtTextUpper = courtMatch.toUpperCase();
+  const locationUpper = (() => {
+    let loc = '';
+    ocrFieldEls.forEach(el => {
+      const label = el.querySelector('.field-label');
+      const value = el.querySelector('.field-value');
+      if (label && label.textContent.trim().toUpperCase() === 'LOCATION') loc = value.textContent.trim().toUpperCase();
+    });
+    return loc;
+  })();
+
+  // Check court match against Clark County courts
+  for (const group of feeData.courts) {
+    if (group.county.toUpperCase().includes('CLARK')) {
+      for (const c of group.courts) {
+        if (courtTextUpper.includes(c.name.toUpperCase()) || c.name.toUpperCase().includes(courtTextUpper.replace(/[^A-Z ]/g, '').trim())) {
+          isOutsideClark = false;
+          break;
+        }
+      }
+      // Also check city names
+      if (isOutsideClark) {
+        const clarkCities = ['LAS VEGAS', 'HENDERSON', 'NORTH LAS VEGAS', 'BOULDER', 'MESQUITE', 'LAUGHLIN', 'SEARCHLIGHT', 'BUNKERVILLE', 'MOAPA', 'OVERTON', 'JEAN'];
+        for (const city of clarkCities) {
+          if (courtTextUpper.includes(city) || locationUpper.includes(city)) { isOutsideClark = false; break; }
+        }
+      }
+      break;
+    }
+  }
+
+  const cdlSurcharge = isCDL ? 950 : 0;
+  const outCountySurcharge = isOutsideClark ? 800 : 0;
+
   // Populate the card
   const bail = 285;
-  const total = matchedFee + courtFee + bail;
+  const total = matchedFee + courtFee + cdlSurcharge + outCountySurcharge + bail;
 
   document.getElementById('efAttorneyFee').textContent = '$' + matchedFee.toLocaleString();
   document.getElementById('efViolationType').textContent = matchedName;
@@ -3266,8 +3318,14 @@ function calculateEstimatedFee() {
   if (breakdownRows[0]) breakdownRows[0].textContent = `Base violation fee (${matchedCat} — ${matchedName})`;
   if (breakdownRows[1]) breakdownRows[1].textContent = `Court coverage fee (${courtMatch})`;
 
+  // Show/hide surcharge rows
+  document.getElementById('efCdlRow').style.display = isCDL ? 'flex' : 'none';
+  document.getElementById('efOutCountyRow').style.display = isOutsideClark ? 'flex' : 'none';
+
   card.classList.add('visible');
-  showToast('info', `💲 Estimated attorney fee: <strong>$${matchedFee}</strong> (${matchedName})`);
+  showToast('info', `💲 Estimated attorney fee: <strong>$${total.toLocaleString()}</strong> (${matchedName})`);
+  if (isCDL) showToast('warn', '🚛 CDL driver detected — <strong>$950 surcharge</strong> applied');
+  if (isOutsideClark) showToast('warn', '📍 Non–Clark County violation — <strong>$800 surcharge</strong> applied');
 }
 
 // ── ENHANCED ANALYSIS (auto-show new sections) ──
@@ -3315,7 +3373,8 @@ runAnalysis = async function() {
 
   animateScore(84);
   startCountdown();
-  calculateEstimatedFee();
+  // Delay fee calculation to ensure all OCR fields are rendered
+  setTimeout(() => calculateEstimatedFee(), 1500);
   autoRecommendMotion();
 
   showToast('success', '✅ Analysis complete — <strong>12 issues found</strong>, <strong>84% dismissal rate</strong>', 6000);
